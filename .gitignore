@@ -1,3 +1,12 @@
+# Файлы проекта PyCharm
+/.idea/**
+
+# Временные файлы python
+**/__pycache__/**
+
+# Временные файлы
+/.temp/**
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
