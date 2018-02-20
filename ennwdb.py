@@ -26,15 +26,8 @@ class NeuralNetworkDB:
                 parent_id   INTEGER,
                 is_alive    INTEGER
             )
-            '''
-        )
-        c.execute(
-            '''
-            CREATE INDEX IF NOT EXISTS idx_nn_species_all_001 ON nn_species_all (
-                is_alive
-            )
-            '''
-        )
+            ''' )
+        c.execute('CREATE INDEX IF NOT EXISTS idx_nn_species_all_001 ON nn_species_all (is_alive)')
 
         c.execute(
             '''
@@ -45,16 +38,8 @@ class NeuralNetworkDB:
                 neuron_owner_id INTEGER,
                 weight          NUMERIC
             )
-            '''
-        )
-        c.execute(
-            '''
-            CREATE INDEX IF NOT EXISTS idx_synapses_001 ON synapses (
-                species_id
-            )
-            '''
-        )
-
+            ''' )
+        c.execute('CREATE INDEX IF NOT EXISTS idx_synapses_001 ON synapses (species_id)')
 
         c.execute(
             '''
@@ -64,15 +49,28 @@ class NeuralNetworkDB:
                 transfer_function_type      INTEGER,
                 transfer_function_params    STRING
             )
-            '''
-        )
+            ''' )
+        c.execute('CREATE INDEX IF NOT EXISTS idx_neuron_bodies_001 ON neuron_bodies (species_id)')
+
         c.execute(
             '''
-            CREATE INDEX IF NOT EXISTS idx_neuron_bodies_001 ON neuron_bodies (
-                species_id
+            CREATE TABLE IF NOT EXISTS nn_input (
+                species_id                  INTEGER,
+                id                          INTEGER,
+                synapse_id                  INTEGER
             )
+            ''' )
+        c.execute('CREATE INDEX IF NOT EXISTS idx_nn_input_001 ON nn_input (synapse_id)')
+
+        c.execute(
             '''
-        )
+            CREATE TABLE IF NOT EXISTS nn_output (
+                species_id                  INTEGER,
+                id                          INTEGER,
+                neuron_id                   INTEGER
+            )
+            ''' )
+        c.execute('CREATE INDEX IF NOT EXISTS idx_nn_output_001 ON nn_output (neuron_id)')
 
 
 
