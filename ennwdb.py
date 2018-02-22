@@ -2,9 +2,9 @@
 Операции с базой данных
 """
 
-import  os
+#import os
 import sqlite3 as sql
-import util.sqlite_helper
+#import util.sqlite_helper
 
 class NeuralNetworkDB:
     def open(self, database_path):
@@ -15,7 +15,7 @@ class NeuralNetworkDB:
         """
 
         self.db = sql.connect(database_path)
-        self._create_structure();
+        self._create_structure()
 
     def _create_structure(self):
         c = self.db.cursor()
