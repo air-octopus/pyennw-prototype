@@ -4,7 +4,7 @@
 
 import transfer_functions as tf
 
-class neuron_body:
+class NeuronBody:
     def __init__(self):
         """
         Инициализация пустого объекта
