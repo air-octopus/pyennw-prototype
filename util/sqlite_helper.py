@@ -1,3 +1,5 @@
+# coding=utf-8
+
 class TransactionAutoCommit:
     def __init__(self, db, stepMax = 0):
         self.db = db
