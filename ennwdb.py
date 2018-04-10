@@ -28,6 +28,14 @@ class NeuralNetworkDB:
         self._cursor.execute("INSERT OR IGNORE INTO outputs_all(sid) VALUES('" + output_sid + "')")
         return self._cursor.lastrowid
 
+    def get_synapses_data(self, species_id):
+        '''
+        load synapses data from the database
+        :param species_id:
+        :return: list of tuples (weight, neuron_in_id, neuron_owner_id)
+        '''
+        return self._cursor.execute("SELECT weight, neuron_in_id, neuron_owner_id FROM synapses WHERE species_id = " + str(species_id))
+
     def _create_structure(self):
         # query_create_parameters     = ''''''
         # query_create_inputs_all     = ''''''

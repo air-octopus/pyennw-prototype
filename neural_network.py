@@ -45,9 +45,24 @@ class NeuralNetwork:
         self._synapses = []
         self._neurons  = []
 
+        # json.load()
 
-        json.load()
+        pass
 
+    def load_inputs(self, inputs):
+        # todo: to be implemented
+        pass
+
+    def get_outputs(self, ):
+        # todo: to be implemented
+        pass
+
+    def do_iteration(self, ):
+        # todo: to be implemented
+        pass
+
+    def reset(self, ):
+        # todo: to be implemented
         pass
 
     def clone(self):
