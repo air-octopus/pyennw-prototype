@@ -1,6 +1,7 @@
 # coding=utf-8
 
 import ennwdb
+import training_data
 #import transfer_functions as tf
 
 #f = tf.relu
@@ -11,6 +12,8 @@ import ennwdb
 # print("f( 1)", f( 1, ()))
 # print("f(17)", f(17, ()))
 
-
 db = ennwdb.NeuralNetworkDB()
 db.open(".temp/temp.db")
+
+j = training_data.TrainingData(db)
+j.load_file(".temp/training-data.json")

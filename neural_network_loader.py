@@ -7,8 +7,8 @@
 import neural_network as nn
 
 class NeuralNetworkLoader:
-    def __init__(self, nndb):
-        self._nndb = nndb
+    def __init__(self, enndb):
+        self._enndb = enndb
 
     def load_nn(self, nnid): # todo
         pass

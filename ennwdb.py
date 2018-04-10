@@ -18,6 +18,15 @@ class NeuralNetworkDB:
 
         self.db = sql.connect(database_path)
         self._create_structure()
+        self._cursor = self.db.cursor()
+
+    def add_inputs(self, input_sid):
+        self._cursor.execute("INSERT OR IGNORE INTO inputs_all(sid) VALUES('" + input_sid + "')")
+        return self._cursor.lastrowid
+
+    def add_outputs(self, output_sid):
+        self._cursor.execute("INSERT OR IGNORE INTO outputs_all(sid) VALUES('" + output_sid + "')")
+        return self._cursor.lastrowid
 
     def _create_structure(self):
         # query_create_parameters     = ''''''
@@ -111,8 +120,3 @@ class NeuralNetworkDB:
         c.execute("INSERT OR IGNORE INTO parameters(sid, value) VALUES('mutator_synapse_adding_probability_factor'   , 0.05 )")
 
         self.db.commit()
-
-
-
-
-
