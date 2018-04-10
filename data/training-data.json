@@ -1,0 +1,18 @@
+{
+    "training_set_name": "xor_001",
+    "inputs": ["input_01", "input_02"],
+    "outputs": ["xor"],
+    "training_set": [
+        {"in": [0, 0], "out": [0]},
+        {"in": [0, 1], "out": [1]},
+        {"in": [1, 0], "out": [1]},
+        {"in": [1, 1], "out": [0]}
+    ],
+    "testing_set": [
+        {"in": [0, 0], "out": [0]},
+        {"in": [0, 1], "out": [1]},
+        {"in": [1, 0], "out": [1]},
+        {"in": [1, 1], "out": [0]}
+    ],
+    "combo_set": []
+}
