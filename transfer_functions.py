@@ -55,16 +55,21 @@ class Type: #(enum.Enum):
     step     = 4
 
     def __init__(self, type):
-        self.type = type
+        self.value = type
 
     def func(self):
-        if self.type == Type.linear:
+        if self.value == Type.linear:
             return linear
-        elif self.type == Type.relu:
+        elif self.value == Type.relu:
             return relu
-        elif self.type == Type.logistic:
+        elif self.value == Type.logistic:
             return logistic
-        elif self.type == Type.step:
+        elif self.value == Type.step:
             return step
         else:
             raise RuntimeError("Unsupported transfer function type")
+
+class TransferFunction:
+    def __init__(self, type):
+        self.type = Type(type)
+        self.func = self.type.func()
