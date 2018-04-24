@@ -30,19 +30,15 @@ class NeuralNetworkLoader:
     # Доступ к внутренним данным
     def input_neurons             (self): return self._input_neurons
     def output_neurons            (self): return self._output_neurons
-    def synapse_weights           (self): return self._synapse_weights
-    def synapse_sources           (self): return self._synapse_sources
-    def synapse_owners            (self): return self._synapse_owners
-    def axons                     (self): return self._axons
-    def transfer_functions        (self): return self._transfer_functions
-    def transfer_functions_params (self): return self._transfer_functions_params
+    def synapses                  (self): return self._synapses
+    def neurons                   (self): return self._neurons
     def map_neuron_id2ind         (self): return self._map_neuron_id2ind
     def extra_data                (self):
         extra_data_value = dict()
         extra_data_value["parent"    ] = self._extra_data_parent
         extra_data_value["input_sids"] =  self._training_data.inputs.copy()
         extra_data_value["output_sids"] =  self._training_data.outputs.copy()
-        extra_data_value["transfer_functions_types"] =  [tf.type for tf in self._transfer_functions]
+        extra_data_value["transfer_functions_types"] =  [n.transfer_function.type for n in self._neurons]
         return extra_data_value
 
 
@@ -68,26 +64,20 @@ class NeuralNetworkLoader:
         pass
 
     def _add_receptor(self, input_data_name):
-        new_neuron_ind = len(self._axons)
+        new_neuron_ind = len(self._neurons)
         new_neuron_tf = tf.TransferFunction(tf.Type.relu)
         new_neuron_tf_params = ()
 
-        #self._map_neuron_id2ind         =
-        self._map_input_sid2ind          [input_data_name] = new_neuron_ind
-        self._axons                     .append([0])
-        self._transfer_functions        .append(new_neuron_tf)
-        self._transfer_functions_params .append(new_neuron_tf_params)
+        self._map_input_sid2ind [input_data_name] = new_neuron_ind
+        self._neurons.append(nn.NeuralNetwork.Neuron([0], new_neuron_tf, new_neuron_tf_params))
 
     def _add_indicator(self, output_data_name):
-        new_neuron_ind = len(self._axons)
+        new_neuron_ind = len(self._neurons)
         new_neuron_tf = tf.TransferFunction(tf.Type.linear)
         new_neuron_tf_params = ()
 
-        #self._map_neuron_id2ind         =
-        self._map_output_sid2ind         [output_data_name] = new_neuron_ind
-        self._axons                     .append([0, 0])
-        self._transfer_functions        .append(new_neuron_tf)
-        self._transfer_functions_params .append(new_neuron_tf_params)
+        self._map_output_sid2ind [output_data_name] = new_neuron_ind
+        self._neurons.append(nn.NeuralNetwork.Neuron([0, 0], new_neuron_tf, new_neuron_tf_params))
 
 
     def _adapt_for_inputs_and_outputs(self):
@@ -116,9 +106,7 @@ class NeuralNetworkLoader:
         for src in (self._map_input_sid2ind[src_sid] for src_sid in inputs_to_add):
             for own in (self._map_output_sid2ind[own_sid] for own_sid in outputs_to_add):
                 # добавляем синаптическую связь
-                self._synapse_weights.append(1)     # todo: вынести значение веса по-умолчанию в настройки
-                self._synapse_sources.append(src)
-                self._synapse_owners .append(own)
+                self._synapses.append(nn.NeuralNetwork.Synapse(src, own, 1)) # todo: вынести значение веса по-умолчанию в настройки
 
         # todo: добавить реализацию для удаления рецепторов и/или индикаторов
 
@@ -133,12 +121,8 @@ class NeuralNetworkLoader:
         Простейшая нейросеть не содержит ничего :) ни нейронов ни синапсов. Создается только общая структура и внутренние переменные
         Поэтому после такого "создания" необходимо запускать адаптацию нейросети к входным и выходным данным
         """
-        self._synapse_weights           = []
-        self._synapse_sources           = []
-        self._synapse_owners            = []
-        self._axons                     = []
-        self._transfer_functions        = []
-        self._transfer_functions_params = []
+        self._synapses                  = []
+        self._neurons                   = []
         self._map_neuron_id2ind         = dict()
         self._map_input_sid2ind         = dict()    # Отображение sid входа в индекс нейрона-рецептора
         self._map_output_sid2ind        = dict()    # Отображение sid выхода в индекс нейрона-индикатора
