@@ -6,6 +6,7 @@
 
 import copy
 import json
+import engine
 
 class NeuralNetwork:
     """
@@ -65,6 +66,7 @@ class NeuralNetwork:
             self.axon = axon
             self.transfer_function = transfer_function
             self.transfer_function_params = transfer_function_params
+            self.effective_deepness = 0
 
 
     def __init__(self, neural_network_loader):      # neural_network_loader : nnl.NeuralNetworkLoader
@@ -73,6 +75,7 @@ class NeuralNetwork:
         self._output_neurons            = neural_network_loader.output_neurons()
         self._synapses                  = neural_network_loader.synapses()
         self._neurons                   = neural_network_loader.neurons()
+        self._effective_deepness        = neural_network_loader.effective_deepness()
         self._extra_data                = neural_network_loader.extra_data()
 
 
@@ -80,7 +83,10 @@ class NeuralNetwork:
         db = engine_.db
 
         # сохраняем id родительской нейросети и получаем (создаем) id текущей
-        nnid = db.save_species_parent_id(self._extra_data["parent"])
+        # todo: реализовать вычисление времени отклика, качества и приспособленности НС
+        nnid = db.save_species(self._extra_data["parent"],
+                               self._effective_deepness,
+                               -1, -1, -1, -1)
 
         # сохраняем параметры нейронов и получаем их идентификаторы
         nids = []

@@ -51,9 +51,14 @@ class NeuralNetworkDB:
 
         query_create_nn_species_all =                       \
             'CREATE TABLE IF NOT EXISTS nn_species_all ('   \
-            '    id          INTEGER PRIMARY KEY,'          \
-            '    parent_id   INTEGER,'                      \
-            '    is_alive    INTEGER'                       \
+            '    id                 INTEGER PRIMARY KEY,'   \
+            '    parent_id          INTEGER,'               \
+            '    is_alive           INTEGER,'               \
+            '    effective_deepness INTEGER,'               \
+            '    response_time      REAL,'                  \
+            '    resolving_ability  REAL,'                  \
+            '    quality            REAL,'                  \
+            '    adaptability       REAL'                   \
             ')'
 
         query_create_synapses =                             \
@@ -134,13 +139,33 @@ class NeuralNetworkDB:
         return list(self._cursor.execute("SELECT weight, neuron_in_id, neuron_owner_id FROM synapses WHERE species_id = " + str(species_id)))
 
 
-    def save_species_parent_id(self, parent_id):
+    def save_species(self, parent_id,
+                     effective_deepness,
+                     response_time,
+                     resolving_ability,
+                     quality,
+                     adaptability
+    ):
         """
         Сохранение parent_id для новой нейросети и таким образом получение для нее собственного идентификатора
         :param parent_id: идентификатор родительской нейросети
+        :param effective_deepness: эффективная глубина нейросети
+        :param response_time: время отклика (целое число, т.к. измеряется в тактах работы НС)
+        :param resolving_ability: временнАя разрешающая способность нейросети
+        :param quality: качество результата, выдаваемого сетью (без учета времени отклика)
+        :param adaptability: единый кумулятивный параметр, определяющий насколько хороша данная НС.
+                    Зависит от качества результата, времени отклика, количества нейронов и синапсов,...
         :return: собственный идентификатор нейросети
         """
-        self._cursor.execute("INSERT INTO nn_species_all (parent_id, is_alive) VALUES (" + str(parent_id) + ", 1)")
+        self._cursor.execute("INSERT INTO nn_species_all (parent_id, is_alive, effective_deepness, response_time, resolving_ability, quality, adaptability) VALUES ("
+                             + str(parent_id)          + ", "
+                             + "1, "
+                             + str(effective_deepness) + ", "
+                             + str(response_time)      + ", "
+                             + str(resolving_ability)  + ", "
+                             + str(quality)            + ", "
+                             + str(adaptability)       + ""
+                             + ")")
         return self._cursor.lastrowid
 
 

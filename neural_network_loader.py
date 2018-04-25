@@ -33,6 +33,7 @@ class NeuralNetworkLoader:
     def synapses                  (self): return self._synapses
     def neurons                   (self): return self._neurons
     def map_neuron_id2ind         (self): return self._map_neuron_id2ind
+    def effective_deepness        (self): return self._effective_deepness
     def extra_data                (self):
         extra_data_value = dict()
         extra_data_value["parent"    ] = self._extra_data_parent
@@ -67,17 +68,24 @@ class NeuralNetworkLoader:
         new_neuron_ind = len(self._neurons)
         new_neuron_tf = tf.TransferFunction(tf.Type.relu)
         new_neuron_tf_params = ()
+        new_neuron = nn.NeuralNetwork.Neuron([0], new_neuron_tf, new_neuron_tf_params)
 
         self._map_input_sid2ind [input_data_name] = new_neuron_ind
-        self._neurons.append(nn.NeuralNetwork.Neuron([0], new_neuron_tf, new_neuron_tf_params))
+        self._neurons.append(new_neuron)
 
     def _add_indicator(self, output_data_name):
         new_neuron_ind = len(self._neurons)
         new_neuron_tf = tf.TransferFunction(tf.Type.linear)
         new_neuron_tf_params = ()
+        new_neuron = nn.NeuralNetwork.Neuron([0, 0], new_neuron_tf, new_neuron_tf_params)
+        # В настоящее время при создании нейрона-индикатора он присоединяется напрямую к рецептору
+        # (у которого глубина по-определению равна нулю),
+        # поэтому в данном случае глубина индикатора будет 1
+        # А вообще... надо todo: добавить функцию перевычисления эффективной глубины нейронов и нейросети
+        new_neuron.effective_deepness = 1
 
         self._map_output_sid2ind [output_data_name] = new_neuron_ind
-        self._neurons.append(nn.NeuralNetwork.Neuron([0, 0], new_neuron_tf, new_neuron_tf_params))
+        self._neurons.append(new_neuron)
 
 
     def _adapt_for_inputs_and_outputs(self):
@@ -114,6 +122,37 @@ class NeuralNetworkLoader:
         self._output_neurons = list(self._map_output_sid2ind[sid] for sid in self._training_data.outputs)
 
 
+    def _calc_effective_deepness(self):
+        for n in self._neurons:
+            n.effective_deepness = -1
+        for i in self._input_neurons:
+            self._neurons[i].effective_deepness = 0
+
+        stop = False
+
+        while (not stop):
+            stop = True
+            replaces_count = 0
+            for synapse in self._synapses:
+                src_effective_deepness = self._neurons[synapse.src].effective_deepness
+                own_effective_deepness = self._neurons[synapse.own].effective_deepness
+                if own_effective_deepness < 0:
+                    if src_effective_deepness >= 0:
+                        self._neurons[synapse.own].effective_deepness = src_effective_deepness + 1
+                        replaces_count += 1
+                    else:
+                        stop = False
+
+            if replaces_count == 0:
+                assert False    # видимо в графе имеются повисшие куски
+                # break
+
+        self._effective_deepness = -1
+        for n in self._neurons:
+            if n.effective_deepness > self._effective_deepness:
+                self._effective_deepness = n.effective_deepness
+
+
     def _build_protozoan(self):
         """
         Построить самую простейшую нейросеть.
@@ -127,6 +166,7 @@ class NeuralNetworkLoader:
         self._map_input_sid2ind         = dict()    # Отображение sid входа в индекс нейрона-рецептора
         self._map_output_sid2ind        = dict()    # Отображение sid выхода в индекс нейрона-индикатора
         self._adapt_for_inputs_and_outputs()
+        self._calc_effective_deepness()
         return self._build_neural_network()
 
 
