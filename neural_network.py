@@ -6,7 +6,8 @@
 
 import copy
 import json
-import engine
+
+# from engine import *
 
 class NeuralNetwork:
     """
@@ -70,6 +71,9 @@ class NeuralNetwork:
 
 
     def __init__(self, neural_network_loader):      # neural_network_loader : nnl.NeuralNetworkLoader
+        # текущая нейросеть пока что существует только в память, поэтому валидного идентификатора у нее несуществует
+        # Валидный идентификатор появится только после сохранения нейросети в БД
+        self.nnid = 0
         # составляющие нейронной сети
         self._input_neurons             = neural_network_loader.input_neurons()
         self._output_neurons            = neural_network_loader.output_neurons()
@@ -78,35 +82,43 @@ class NeuralNetwork:
         self._effective_deepness        = neural_network_loader.effective_deepness()
         self._extra_data                = neural_network_loader.extra_data()
 
+        self.response_time              = -1
+        self.resolving_ability          = -1
+        self.quality                    = -1
+        self.adaptability               = -1
 
-    def save(self, engine_):        # engine_ : engine.Engine
+
+    def save(self, engine_):        # engine_ : Engine
         db = engine_.db
 
         # сохраняем id родительской нейросети и получаем (создаем) id текущей
         # todo: реализовать вычисление времени отклика, качества и приспособленности НС
-        nnid = db.save_species(self._extra_data["parent"],
-                               self._effective_deepness,
-                               -1, -1, -1, -1)
+        self.nnid = db.save_species(self._extra_data["parent"],
+                                    self._effective_deepness,
+                                    self.response_time,
+                                    self.resolving_ability,
+                                    self.quality,
+                                    self.adaptability)
 
         # сохраняем параметры нейронов и получаем их идентификаторы
         nids = []
         for o in self._neurons:
-            nid = db.save_neuron_body(nnid, o.transfer_function.type.value, json.dumps(o.transfer_function_params), len(o.axon))
+            nid = db.save_neuron_body(self.nnid, o.transfer_function.type.value, json.dumps(o.transfer_function_params), len(o.axon))
             nids.append(nid)
         # ... теперь nids[i] -- идентификатор i-го нейрона
 
         # сохраняем информацию о синапсах ...
         for o in self._synapses:
-            db.save_synapse(nnid, nids[o.src], nids[o.own], o.weight)
+            db.save_synapse(self.nnid, nids[o.src], nids[o.own], o.weight)
 
 
         # ... входных ...
         for z in zip(self._input_neurons, self._extra_data["input_sids"]):
-            db.save_nn_inputs(nnid, nids[z[0]], z[1])
+            db.save_nn_inputs(self.nnid, nids[z[0]], z[1])
 
         # ... и выходных нейронах
         for z in zip(self._output_neurons, self._extra_data["output_sids"]):
-            db.save_nn_outputs(nnid, nids[z[0]], z[1])
+            db.save_nn_outputs(self.nnid, nids[z[0]], z[1])
 
         db.sqldb.commit()
 

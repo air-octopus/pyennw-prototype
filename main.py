@@ -1,8 +1,10 @@
 # coding=utf-8
 
-import engine
-#import ennwdb
 import os
+
+# import from enn_engine
+from engine import *
+#import ennwdb
 #import training_data
 #import transfer_functions as tf
 
@@ -18,11 +20,11 @@ import os
 if (os.access(".temp/temp.db", os.F_OK)):
     os.remove(".temp/temp.db")
 
-nnengine = engine.Engine(".temp/temp.db", "data/training-data.json")
+engine = Engine(".temp/temp.db", "data/training-data.json")
 
-nn = nnengine.neural_network_loader.load_neural_network(0)
+nn = engine.neural_network_loader.load_neural_network(0)
 
-nn.save(nnengine)
+nn.save(engine)
 
 # db = ennwdb.NeuralNetworkDB()
 # db.open(".temp/temp.db")

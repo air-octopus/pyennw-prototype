@@ -4,9 +4,7 @@
 Операции с базой данных
 """
 
-#import os
 import sqlite3 as sql
-#import util.sqlite_helper
 
 class NeuralNetworkDB:
     def open(self, database_path):
@@ -22,7 +20,7 @@ class NeuralNetworkDB:
 
 
     def _create_structure(self):
-        # query_create_parameters     = ''''''
+        # query_create_config     = ''''''
         # query_create_inputs_all     = ''''''
         # query_create_outputs_all    = ''''''
         # query_create_nn_species_all = ''''''
@@ -31,8 +29,8 @@ class NeuralNetworkDB:
         # query_create_nn_input       = ''''''
         # query_create_nn_output      = ''''''
 
-        query_create_parameters =                     \
-            'CREATE TABLE IF NOT EXISTS parameters (' \
+        query_create_config =                         \
+            'CREATE TABLE IF NOT EXISTS config     (' \
             '    sid         TEXT UNIQUE,'            \
             '    value       REAL'                    \
             ')'
@@ -96,7 +94,7 @@ class NeuralNetworkDB:
 
         c = self.sqldb.cursor()
 
-        c.execute(query_create_parameters    )
+        c.execute(query_create_config    )
         c.execute(query_create_inputs_all    )
         c.execute(query_create_outputs_all   )
         c.execute(query_create_nn_species_all)
@@ -111,13 +109,18 @@ class NeuralNetworkDB:
 #        c.execute('CREATE INDEX IF NOT EXISTS idx_nn_input_001       ON nn_input       (synapse_id) ')
 #        c.execute('CREATE INDEX IF NOT EXISTS idx_nn_output_001      ON nn_output      (neuron_id)  ')
 
-        c.execute("INSERT OR IGNORE INTO parameters (sid, value) VALUES ('alive_neural_network_queue_len'              , 100  )")
-        c.execute("INSERT OR IGNORE INTO parameters (sid, value) VALUES ('mutator_neuron_deleting_probability_factor'  , 0.01 )")
-        c.execute("INSERT OR IGNORE INTO parameters (sid, value) VALUES ('mutator_synapse_deleting_probability_factor' , 0.05 )")
-        c.execute("INSERT OR IGNORE INTO parameters (sid, value) VALUES ('mutator_neuron_adding_probability_factor'    , 0.01 )")
-        c.execute("INSERT OR IGNORE INTO parameters (sid, value) VALUES ('mutator_synapse_adding_probability_factor'   , 0.05 )")
+        c.execute("INSERT OR IGNORE INTO config (sid, value) VALUES ('alive_neural_network_queue_len'              , 100  )")
+        c.execute("INSERT OR IGNORE INTO config (sid, value) VALUES ('mutator_neuron_deleting_probability_factor'  , 0.01 )")
+        c.execute("INSERT OR IGNORE INTO config (sid, value) VALUES ('mutator_synapse_deleting_probability_factor' , 0.05 )")
+        c.execute("INSERT OR IGNORE INTO config (sid, value) VALUES ('mutator_neuron_adding_probability_factor'    , 0.01 )")
+        c.execute("INSERT OR IGNORE INTO config (sid, value) VALUES ('mutator_synapse_adding_probability_factor'   , 0.05 )")
 
         self.sqldb.commit()
+
+
+    def load_config(self):
+        q = self._cursor.execute("SELECT sid, value FROM config")
+        return {o[0]: o[1] for o in q}
 
 
     def add_inputs(self, input_sid):
@@ -128,6 +131,15 @@ class NeuralNetworkDB:
     def add_outputs(self, output_sid):
         self._cursor.execute("INSERT OR IGNORE INTO outputs_all (sid) VALUES ('" + output_sid + "')")
         return self._cursor.lastrowid
+
+
+    def get_alive_species(self):
+        """
+        :return: список идентификаторов живых сетей
+        """
+        q = self._cursor.execute(
+                "SELECT id FROM nn_species_all WHERE is_alive != 0")
+        return [o[0] for o in q]
 
 
     def load_synapses_data(self, species_id):

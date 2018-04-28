@@ -3,9 +3,9 @@
 Загрузка параметров нейронной сети из базы данных и создание соответствующего экземпляра нейронной сети
 """
 
-import engine
-import neural_network as nn
-import transfer_functions as tf
+# from engine import *
+from neural_network import *
+from transfer_functions import *
 
 class NeuralNetworkLoader:
     def __init__(self, engine_):
@@ -66,18 +66,18 @@ class NeuralNetworkLoader:
 
     def _add_receptor(self, input_data_name):
         new_neuron_ind = len(self._neurons)
-        new_neuron_tf = tf.TransferFunction(tf.Type.relu)
+        new_neuron_tf = TransferFunction(Type.relu)
         new_neuron_tf_params = ()
-        new_neuron = nn.NeuralNetwork.Neuron([0], new_neuron_tf, new_neuron_tf_params)
+        new_neuron = NeuralNetwork.Neuron([0], new_neuron_tf, new_neuron_tf_params)
 
         self._map_input_sid2ind [input_data_name] = new_neuron_ind
         self._neurons.append(new_neuron)
 
     def _add_indicator(self, output_data_name):
         new_neuron_ind = len(self._neurons)
-        new_neuron_tf = tf.TransferFunction(tf.Type.linear)
+        new_neuron_tf = TransferFunction(Type.linear)
         new_neuron_tf_params = ()
-        new_neuron = nn.NeuralNetwork.Neuron([0, 0], new_neuron_tf, new_neuron_tf_params)
+        new_neuron = NeuralNetwork.Neuron([0, 0], new_neuron_tf, new_neuron_tf_params)
         # В настоящее время при создании нейрона-индикатора он присоединяется напрямую к рецептору
         # (у которого глубина по-определению равна нулю),
         # поэтому в данном случае глубина индикатора будет 1
@@ -114,7 +114,7 @@ class NeuralNetworkLoader:
         for src in (self._map_input_sid2ind[src_sid] for src_sid in inputs_to_add):
             for own in (self._map_output_sid2ind[own_sid] for own_sid in outputs_to_add):
                 # добавляем синаптическую связь
-                self._synapses.append(nn.NeuralNetwork.Synapse(src, own, 1)) # todo: вынести значение веса по-умолчанию в настройки
+                self._synapses.append(NeuralNetwork.Synapse(src, own, 1)) # todo: вынести значение веса по-умолчанию в настройки
 
         # todo: добавить реализацию для удаления рецепторов и/или индикаторов
 
@@ -171,7 +171,7 @@ class NeuralNetworkLoader:
 
 
     def _build_neural_network(self):
-        return nn.NeuralNetwork(self)
+        return NeuralNetwork(self)
 
 
 

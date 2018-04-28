@@ -8,7 +8,6 @@
 """
 
 import math
-import enum
 
 
 def linear(x, p):

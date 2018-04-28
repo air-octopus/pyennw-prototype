@@ -3,7 +3,7 @@
 import json
 import random
 
-import ennwdb
+from ennwdb import *
 
 
 class TrainingData:
@@ -26,7 +26,7 @@ class TrainingData:
             self.data_out = data_out
 
 
-    def __init__(self, db: ennwdb.NeuralNetworkDB):
+    def __init__(self, db: NeuralNetworkDB):
         self._db = db
         self.load_str('''
             {
