@@ -72,6 +72,7 @@ class NeuralNetworkDB:
             'CREATE TABLE IF NOT EXISTS neuron_bodies ('                        \
             '    id                          INTEGER PRIMARY KEY,'              \
             '    species_id                  INTEGER,'                          \
+            '    bias                        REAL,'                             \
             '    transfer_function_type      INTEGER,'                          \
             '    transfer_function_params    TEXT,'                             \
             '    axon_length                 INTEGER CHECK(axon_length > 0)'    \
