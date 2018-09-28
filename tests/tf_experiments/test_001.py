@@ -25,10 +25,10 @@ input_value = tf.constant(1.0)
 # Создадим переменную
 weight = tf.Variable(0.8)
 
-# Создаим выходное значение
+# Создадим выходное значение
 output_value = weight * input_value
 
-# создаим сессию
+# создадим сессию
 sess = tf.Session()
 
 # Создаем оптимизиатор
@@ -46,7 +46,8 @@ x = []
 y = []
 
 # Обучаем
-train_step = tf.train.GradientDescentOptimizer(0.025).minimize(loss)
+# train_step = tf.train.GradientDescentOptimizer(0.025).minimize(loss)
+train_step = optim.minimize(loss)
 for i in range(100):
     sess.run(train_step)
     x.append(i)
