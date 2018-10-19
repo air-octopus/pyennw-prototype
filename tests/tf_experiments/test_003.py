@@ -16,5 +16,9 @@ a = tf.constant([7, 6, 5, 4, 3, 2, 1])
 b = tf.gather(a, ab)
 c = tf.gather(b, bc)
 
+print(tf.Session().run(b))
 print(tf.Session().run(c))
-#print(tf.Session().run(ttt))
+
+# результат:
+#   [6 4 3 3]
+#   [6 6 6 4 3 3]

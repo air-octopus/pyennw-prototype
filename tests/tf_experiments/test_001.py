@@ -1,17 +1,10 @@
-# import numpy as np
-#
-# import tensorflow as tf
-#
-# in_01 = tf.constant(tf.zeros([2]))
-# v_01 = tf.Variable(1)
-# #v_02 = v_01.
-# out_01 = v_01 * in_01[1]
-#
-# sess = tf.Session()
-# print(sess.run(out_01))
-
 ##################################################################
 ## http://wiki.programstore.ru/python-tensorflow-dlya-chajnikov-chast-1/
+#
+# Простейший пример использования обучения tensorflow-графа.
+# Граф: константа (=1) умноженная на переменную (нач.знач. =0.8)
+# Требуемое значение на выходе: 2
+# Количество итераций: 100
 
 import tensorflow as tf
 import matplotlib.pyplot as plt
@@ -65,3 +58,7 @@ plt.ylabel('Ось Y')
 plt.xlabel('Ось X')
 plt.grid(True)
 plt.show()
+
+# результат:
+#   1.9928955   -- результирующее значение после обучения
+#   + график, демонстрирующимй уменьшение ошибки
