@@ -27,7 +27,6 @@ input_value = tf.placeholder(dtype=tf.float32, shape=[None, 2])
 desired_value = tf.placeholder(dtype=tf.float32, shape=[None])
 
 # веса синапсов (2 входа * 2 нейрона + 2 входа на нейрон второй сети)
-
 weight_lay_1 = tf.Variable(weight_initializer([2, 2]))
 weight_lay_2 = tf.Variable(weight_initializer([2, 1]))
 
@@ -48,8 +47,12 @@ bias_lay_2 = tf.Variable(bias_initializer([1]))
 # bias_lay_2 = [tf.Variable(0)]
 
 # выходное значение
-a = tf.sigmoid(tf.matmul(input_value, weight_lay_1) + bias_lay_1)
-b = tf.sigmoid(tf.matmul(a          , weight_lay_2) + bias_lay_2)
+# a = tf.nn.relu(tf.matmul(input_value, weight_lay_1) )
+# b = tf.nn.relu(tf.matmul(a          , weight_lay_2) )
+a = tf.nn.relu(tf.matmul(input_value, weight_lay_1) + bias_lay_1)
+b = tf.nn.relu(tf.matmul(a          , weight_lay_2) + bias_lay_2)
+# a = tf.sigmoid(tf.matmul(input_value, weight_lay_1) + bias_lay_1)
+# b = tf.sigmoid(tf.matmul(a          , weight_lay_2) + bias_lay_2)
 
 # a = tf.sigmoid(weight_lay_1[0] * input_value + bias_lay_1)
 # b = tf.sigmoid(weight_lay_1[1] * input_value + bias_lay_1)
@@ -96,7 +99,7 @@ data_out = [0, 1, 1, 0]
 # train_step = tf.train.GradientDescentOptimizer(0.025).minimize(loss)
 train_step = optim.minimize(loss)
 feed_data={input_value: data_in, desired_value: data_out}
-for i in range(2000):
+for i in range(200):
     sess.run(train_step, feed_dict=feed_data)
     x.append(i)
     y.append(sess.run(loss, feed_dict=feed_data))
@@ -120,12 +123,12 @@ for i in range(2000):
 fig = plt.figure()
 
 plt.plot(x, y  )
-# plt.plot(x, w10)
-# plt.plot(x, w11)
-# plt.plot(x, w20)
-# plt.plot(x, w21)
-# plt.plot(x, w30)
-# plt.plot(x, w31)
+plt.plot(x, w10)
+plt.plot(x, w11)
+plt.plot(x, w20)
+plt.plot(x, w21)
+plt.plot(x, w30)
+plt.plot(x, w31)
 # plt.plot(x, b1 )
 # plt.plot(x, b2 )
 # plt.plot(x, b3 )
