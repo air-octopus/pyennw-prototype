@@ -12,6 +12,23 @@
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
+
+def variable_summaries(var):
+    """
+    https://www.tensorflow.org/guide/summaries_and_tensorboard
+    Attach a lot of summaries to a Tensor (for TensorBoard visualization).
+    """
+    with tf.name_scope('summaries'):
+        mean = tf.reduce_mean(var)
+        tf.summary.scalar('mean', mean)
+        with tf.name_scope('stddev'):
+            stddev = tf.sqrt(tf.reduce_mean(tf.square(var - mean)))
+        tf.summary.scalar('stddev', stddev)
+        tf.summary.scalar('max', tf.reduce_max(var))
+        tf.summary.scalar('min', tf.reduce_min(var))
+        tf.summary.histogram('histogram', var)
+
+
 # Создадим граф
 graph = tf.get_default_graph()
 
@@ -23,16 +40,20 @@ bias_initializer = tf.zeros_initializer()
 # входные значения (по 2 элемента на каждый запуск нейросети)
 # и эталонное результирующее значение
 # итого -- 3 числа
-input_value = tf.placeholder(dtype=tf.float32, shape=[None, 2])
-desired_value = tf.placeholder(dtype=tf.float32, shape=[None])
+input_value = tf.placeholder(dtype=tf.float32, shape=[None, 2], name="input_value")
+desired_value = tf.placeholder(dtype=tf.float32, shape=[None], name="desired_value")
 
 # веса синапсов (2 входа * 2 нейрона + 2 входа на нейрон второй сети)
-weight_lay_1 = tf.Variable(weight_initializer([2, 2]))
-weight_lay_2 = tf.Variable(weight_initializer([2, 1]))
+weight_lay_1 = tf.Variable(weight_initializer([2, 2]), name="weight_lay_1")
+weight_lay_2 = tf.Variable(weight_initializer([2, 1]), name="weight_lay_2")
 
-bias_lay_1 = tf.Variable(bias_initializer([2]))
-bias_lay_2 = tf.Variable(bias_initializer([1]))
+bias_lay_1 = tf.Variable(bias_initializer([2]), name="bias_lay_1")
+bias_lay_2 = tf.Variable(bias_initializer([1]), name="bias_lay_2")
 
+variable_summaries(weight_lay_1)
+variable_summaries(weight_lay_2)
+variable_summaries(bias_lay_1)
+variable_summaries(bias_lay_2)
 
 # weight_lay_1 = [
 #     [tf.Variable(0), tf.Variable(0)],   # нейрон 1 (первый слой)
@@ -53,6 +74,9 @@ a = tf.nn.relu(tf.matmul(input_value, weight_lay_1) + bias_lay_1)
 b = tf.nn.relu(tf.matmul(a          , weight_lay_2) + bias_lay_2)
 # a = tf.sigmoid(tf.matmul(input_value, weight_lay_1) + bias_lay_1)
 # b = tf.sigmoid(tf.matmul(a          , weight_lay_2) + bias_lay_2)
+
+tf.summary.histogram('a', a)
+tf.summary.histogram('b', b)
 
 # a = tf.sigmoid(weight_lay_1[0] * input_value + bias_lay_1)
 # b = tf.sigmoid(weight_lay_1[1] * input_value + bias_lay_1)
@@ -95,11 +119,18 @@ data_in = [
 ]
 data_out = [0, 1, 1, 0]
 
+merged = tf.summary.merge_all()
+
+file_writer = tf.summary.FileWriter('/home/maksko/-/Temp/001', graph)
+
 # Обучаем
 # train_step = tf.train.GradientDescentOptimizer(0.025).minimize(loss)
 train_step = optim.minimize(loss)
 feed_data={input_value: data_in, desired_value: data_out}
 for i in range(200):
+    summary = sess.run(merged, feed_dict=feed_data)
+    file_writer.add_summary(summary, i)
+
     sess.run(train_step, feed_dict=feed_data)
     x.append(i)
     y.append(sess.run(loss, feed_dict=feed_data))
@@ -138,7 +169,7 @@ plt.title('График функции')
 plt.ylabel('Ось Y')
 plt.xlabel('Ось X')
 plt.grid(True)
-plt.show()
+# plt.show()
 
 # результат:
 #   1.9928955   -- результирующее значение после обучения
