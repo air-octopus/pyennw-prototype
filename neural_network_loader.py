@@ -39,6 +39,7 @@ class NeuralNetworkLoader:
         extra_data_value["parent"    ] = self._extra_data_parent
         extra_data_value["input_sids"] =  self._training_data.inputs.copy()
         extra_data_value["output_sids"] =  self._training_data.outputs.copy()
+        # todo: а это тут зачем????
         extra_data_value["transfer_functions_types"] =  [n.transfer_function.type for n in self._neurons]
         return extra_data_value
 

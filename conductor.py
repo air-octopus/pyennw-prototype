@@ -22,6 +22,7 @@ class Conductor:
             self._nn_queue_pending, self._nn_queue_active = self._nn_queue_active, self._nn_queue_pending
             self._nn_queue_active.sort(key=lambda x: x[1], reverse=True)
             max_len = self._engine.config.alive_neural_network_queue_len()
+            # todo: при удалении сетей из очереди их надо помечать неактивными в базе данных
             if len(self._nn_queue_active) > max_len:
                 self._nn_queue_active = self._nn_queue_active[:max_len]
 
