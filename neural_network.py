@@ -7,6 +7,9 @@
 import copy
 import json
 
+#from neural_network_impl.data import Data
+import neural_network_impl as nn
+
 # from engine import *
 
 class NeuralNetwork:
@@ -38,54 +41,47 @@ class NeuralNetwork:
         * заполняются выходные данные
     """
 
+    @property
+    def data(self):
+        return self.__data
 
-    class Synapse:
-        """
-        Класс-структура, описывающий один синапс
-        """
-        def __init__(self, neuron_src, neuron_own, weight):
-            """
-            :param neuron_src: индекс нейрона-источника данных
-            :param neuron_own: индекс нейрона-владельца синапса
-            :param weight: вес синапса
-            """
-            self.src = neuron_src
-            self.own = neuron_own
-            self.weight = weight
+    def __init__(self, id):      # neural_network_loader : nnl.NeuralNetworkLoader
+
+        self.__data = nn.Data()
 
 
-    class Neuron:
-        """
-        Класс-структура, описывающий один нейрон
-        """
-        def __init__(self, axon, transfer_function, transfer_function_params):
-            """
-            :param axon: массив-очередь данных нейрона (аксон)
-            :param transfer_function: передаточная функция нейрона
-            :param transfer_function_params: параметры передаточной функции
-            """
-            self.axon = axon
-            self.transfer_function = transfer_function
-            self.transfer_function_params = transfer_function_params
-            self.effective_deepness = 0
-
-
-    def __init__(self, neural_network_loader):      # neural_network_loader : nnl.NeuralNetworkLoader
-        # текущая нейросеть пока что существует только в памяти, поэтому имеет невалидный идентификатор
-        # Валидный идентификатор появится только после сохранения нейросети в БД
-        self.nnid = 0
-        # составляющие нейронной сети
-        self._input_neurons             = neural_network_loader.input_neurons()
-        self._output_neurons            = neural_network_loader.output_neurons()
-        self._synapses                  = neural_network_loader.synapses()
-        self._neurons                   = neural_network_loader.neurons()
-        self._effective_deepness        = neural_network_loader.effective_deepness()
-        self._extra_data                = neural_network_loader.extra_data()
+        self._input_neurons             = []
+        self._output_neurons            = []
+        self._synapses                  = []
+        self._neurons                   = []
+        self._effective_deepness        = -1
+        self._extra_data                = {
+            "parent"                  : 0 ,
+            "input_sids"              : [],
+            "output_sids"             : [],
+        }
 
         self.response_time              = -1
         self.resolving_ability          = -1
         self.quality                    = -1
         self.adaptability               = -1
+
+
+        # # текущая нейросеть пока что существует только в памяти, поэтому имеет невалидный идентификатор
+        # # Валидный идентификатор появится только после сохранения нейросети в БД
+        # self.nnid = 0
+        # # составляющие нейронной сети
+        # self._input_neurons             = neural_network_loader.input_neurons()
+        # self._output_neurons            = neural_network_loader.output_neurons()
+        # self._synapses                  = neural_network_loader.synapses()
+        # self._neurons                   = neural_network_loader.neurons()
+        # self._effective_deepness        = neural_network_loader.effective_deepness()
+        # self._extra_data                = neural_network_loader.extra_data()
+        #
+        # self.response_time              = -1
+        # self.resolving_ability          = -1
+        # self.quality                    = -1
+        # self.adaptability               = -1
 
 
     def save(self, engine_):        # engine_ : Engine
