@@ -2,7 +2,7 @@
 
 import os
 
-# import from enn_engine
+from engine_creator import *
 from engine import Engine
 #import ennwdb
 #import training_data
@@ -33,9 +33,11 @@ import neural_network_impl as nn
 if (os.access(".temp/temp.db", os.F_OK)):
     os.remove(".temp/temp.db")
 
-engine = Engine(".temp/temp.db", "data/training-data.json")
+create_engine(".temp/temp.db", "data/training-data.json")
+# engine = Engine(".temp/temp.db", "data/training-data.json")
+engine = Engine.instance()
 
-builder = nn.Builder(engine)
+builder = nn.Builder()
 d = builder.build_protozoan()
 
 # nn = engine.neural_network_loader.load_neural_network(0)

@@ -43,11 +43,11 @@ class NeuralNetwork:
 
     @property
     def data(self):
-        return self.__data
+        return self._data
 
     def __init__(self, id):      # neural_network_loader : nnl.NeuralNetworkLoader
 
-        self.__data = nn.Data()
+        self._data = nn.Data()
 
 
         self._input_neurons             = []

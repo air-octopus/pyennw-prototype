@@ -2,31 +2,29 @@
 
 import neural_network_impl as nn
 from neural_network_impl.transfer_functions import Type
+from engine import *
 
 class Builder:
 
     class TempData:
-        def __init__(self, engine):
+        def __init__(self):
             self._map_neuron_id2ind  = dict()  # Отображение id нейрона в его индекс
             self._map_input_sid2ind  = dict()  # Отображение sid входа в индекс нейрона-рецептора
             self._map_output_sid2ind = dict()  # Отображение sid выхода в индекс нейрона-индикатора
-            self.engine = engine
 
         @property
         def input_neurons(self):
-            return list(self._map_input_sid2ind[sid] for sid in self.engine.training_data.inputs)
+            return list(self._map_input_sid2ind[sid] for sid in Engine.instance().training_data.inputs)
 
         @property
         def output_neurons(self):
-            return list(self._map_output_sid2ind[sid] for sid in self.engine.training_data.outputs)
+            return list(self._map_output_sid2ind[sid] for sid in Engine.instance().training_data.outputs)
 
-    @property
-    def engine(self): return self._engine
     @property
     def data(self): return self._data
 
-    def __init__(self, engine):
-        self._engine = engine
+    def __init__(self):
+        pass
 
     def __clear(self):
         self._data = None
@@ -38,7 +36,7 @@ class Builder:
         По сути эта нейросеть состоит только из нейронов-рецепторов, нейронов-индикаторов
         и связей между ними по типу все-со-всеми
         """
-        self._temp_data = Builder.TempData(self.engine)
+        self._temp_data = Builder.TempData()
         self._data = nn.Data()
         self._adapt_for_inputs_and_outputs()
         self._calc_effective_deepness()
@@ -77,8 +75,8 @@ class Builder:
             * недостающие нейроны-рецепторы и -индикаторы
             * связи между добавленными рецепторами и индикаторами по типу все-со-всеми
         """
-        current_inputs_set  = set(self.engine.training_data.inputs)
-        current_outputs_set = set(self.engine.training_data.outputs)
+        current_inputs_set  = set(Engine.instance().training_data.inputs)
+        current_outputs_set = set(Engine.instance().training_data.outputs)
         have_inputs_set     = set(self._temp_data._map_input_sid2ind.keys())
         have_outputs_set    = set(self._temp_data._map_output_sid2ind.keys())
 
