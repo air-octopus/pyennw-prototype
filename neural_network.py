@@ -10,7 +10,7 @@ import json
 #from neural_network_impl.data import Data
 import neural_network_impl as nn
 
-# from engine import *
+from engine import Engine
 
 class NeuralNetwork:
     """
@@ -47,24 +47,30 @@ class NeuralNetwork:
 
     def __init__(self, id):      # neural_network_loader : nnl.NeuralNetworkLoader
 
-        self._data = nn.Data()
+        if id == 0:
+            self._data = nn.Builder().build_protozoan()
+        else:
+            # todo: to be implemented
+            raise Exception('Not implemented')
+
+        # self._data = nn.Data()
 
 
-        self._input_neurons             = []
-        self._output_neurons            = []
-        self._synapses                  = []
-        self._neurons                   = []
-        self._effective_deepness        = -1
-        self._extra_data                = {
-            "parent"                  : 0 ,
-            "input_sids"              : [],
-            "output_sids"             : [],
-        }
-
-        self.response_time              = -1
-        self.resolving_ability          = -1
-        self.quality                    = -1
-        self.adaptability               = -1
+        # self._input_neurons             = []
+        # self._output_neurons            = []
+        # self._synapses                  = []
+        # self._neurons                   = []
+        # self._effective_deepness        = -1
+        # self._extra_data                = {
+        #     "parent"                  : 0 ,
+        #     "input_sids"              : [],
+        #     "output_sids"             : [],
+        # }
+        #
+        # self.response_time              = -1
+        # self.resolving_ability          = -1
+        # self.quality                    = -1
+        # self.adaptability               = -1
 
 
         # # текущая нейросеть пока что существует только в памяти, поэтому имеет невалидный идентификатор
@@ -84,37 +90,38 @@ class NeuralNetwork:
         # self.adaptability               = -1
 
 
-    def save(self, engine_):        # engine_ : Engine
-        db = engine_.db
+    def save(self):
+        db = Engine.instance().db
 
         # сохраняем id родительской нейросети и получаем (создаем) id текущей
         # todo: реализовать вычисление времени отклика, качества и приспособленности НС
-        self.nnid = db.save_species(self._extra_data["parent"],
-                                    self._effective_deepness,
-                                    self.response_time,
-                                    self.resolving_ability,
-                                    self.quality,
-                                    self.adaptability)
+        self.data.nnid = db.save_species(self.data.extra_data["parent"],
+                                    self.data.effective_deepness,
+                                    self.data.response_time,
+                                    self.data.resolving_ability,
+                                    self.data.quality,
+                                    self.data.adaptability)
+
+        # todo: идея с массивом nids мне не нра -- лучше записывать идентификаторы непосредственно в нейроны
 
         # сохраняем параметры нейронов и получаем их идентификаторы
         nids = []
-        for o in self._neurons:
-            nid = db.save_neuron_body(self.nnid, o.transfer_function.type.value, json.dumps(o.transfer_function_params), len(o.axon))
+        for o in self.data.neurons:
+            nid = db.save_neuron_body(self.data.nnid, o.transfer_function_type, json.dumps(o.transfer_function_params), len(o.axon))
             nids.append(nid)
         # ... теперь nids[i] -- идентификатор i-го нейрона
 
         # сохраняем информацию о синапсах ...
-        for o in self._synapses:
-            db.save_synapse(self.nnid, nids[o.src], nids[o.own], o.weight)
-
+        for o in self.data.synapses:
+            db.save_synapse(self.data.nnid, nids[o.src], nids[o.own], o.weight)
 
         # ... входных ...
-        for z in zip(self._input_neurons, self._extra_data["input_sids"]):
-            db.save_nn_inputs(self.nnid, nids[z[0]], z[1])
+        for z in zip(self.data.input_neurons, self.data.extra_data["input_sids"]):
+            db.save_nn_inputs(self.data.nnid, nids[z[0]], z[1])
 
         # ... и выходных нейронах
-        for z in zip(self._output_neurons, self._extra_data["output_sids"]):
-            db.save_nn_outputs(self.nnid, nids[z[0]], z[1])
+        for z in zip(self.data.output_neurons, self.data.extra_data["output_sids"]):
+            db.save_nn_outputs(self.data.nnid, nids[z[0]], z[1])
 
         db.sqldb.commit()
 
@@ -123,62 +130,56 @@ class NeuralNetwork:
         """
         Загрузка входных данных в нейросеть.
         """
-        for input_ind, val in enumerate(inputs):
-            self._neurons[self._input_neurons[input_ind]].axon[0] = val
+        for neuron_ind, val in zip(self.data.input_neurons, inputs):
+            self.data.neurons[neuron_ind].axon[0] = val
 
 
-    def get_outputs(self, ):
+    def get_outputs(self):
         """
         Выгрузка выходных данных
         """
-        return list(self._neurons[output_ind].axon[-1] for output_ind in self._output_neurons)
+        return list(self.data.neurons[output_ind].axon[-1] for output_ind in self.data.output_neurons)
 
 
     def do_iteration(self, ):
-        # shortcats
-        neurons     = self._neurons
-        synapses    = self._synapses
+        # todo: реализовать через tensorflow
+        pass
+        # # shortcats
+        # neurons     = self.data.neurons
+        # synapses    = self.data.synapses
+        #
+        # # прокручиваем аксоны
+        # for n in neurons:
+        #     if (len(n.axon) > 1): # исключаем рецепторы (у которых длина аксона == 1)
+        #         n.axon = [0] + n.axon[0:-1]
+        #
+        # # выполняем действия над синапсами
+        # for synapse in synapses:
+        #     neurons[synapse.own].axon[0] += neurons[synapse.src].axon[-1] * neurons[synapse.own].weight
+        #
+        # # применяем передаточную функцию
+        # for n in neurons:
+        #     if (len(n.axon) > 1): # исключаем рецепторы (у которых длина аксона == 1)
+        #         n.axon[0] = n.transfer_function.func(n.axon[0], n.transfer_function_params)
 
-        # прокручиваем аксоны
-        for n in neurons:
-            if (len(n.axon) > 1): # исключаем рецепторы (у которых длина аксона == 1)
-                n.axon = [0] + n.axon[0:-1]
 
-        # выполняем действия над синапсами
-        for synapse in synapses:
-            neurons[synapse.own].axon[0] += neurons[synapse.src].axon[-1] * neurons[synapse.own].weight
-
-        # применяем передаточную функцию
-        for n in neurons:
-            if (len(n.axon) > 1): # исключаем рецепторы (у которых длина аксона == 1)
-                n.axon[0] = n.transfer_function.func(n.axon[0], n.transfer_function_params)
-
-
-    def reset(self, ):
+    def reset(self):
         """
         Сбросить состояние нейросети в исходное.
-        Состояние -- это те данные, которые могут меняться в процессе работы нейросети
-        (в отличие от данных, описывающих структуру нейросети).
-        Таковыми являются данные, сохраненные в аксонах
         """
-        for n in self._neurons:
-            n.axon = [0] * len(n.axon)
-
+        self.data.reset()
 
     def clone(self):
         """
-        Создать копию нейросети. Все данные (и состояние нейросети и ее структура) будут скопированы.
+        Создать копию данных нейросети
         """
-        return copy.deepcopy(self)
-
+        return self.data.clone()
 
     def clone_clean(self):
         """
         Создать нейросеть с такой же структурой, но с начальным состоянием
         """
-        nn = self.clone()
-        nn.reset()
-        return nn
+        return self.data.clone_clean()
 
 
     def clone_state(self):
@@ -186,7 +187,7 @@ class NeuralNetwork:
         Сохранить состояние нейросети
         :return: состояние нейросети (на данный момент состояние содержится в массиве аксонов)
         """
-        [copy.deepcopy(n.axon) for n in self._neurons]
+        return self.data.clone_state()
 
 
     def restore_state(self, state):
@@ -194,5 +195,4 @@ class NeuralNetwork:
         Восстановить состояние нейросети, сохраненное с помощью метода clone_state()
         :param state: состояние НС, полученное ранее с помощью метода clone_state()
         """
-        for z in zip(self._neurons, state):
-            z[0].axon = z[1]
+        self.data.restore_state(state)

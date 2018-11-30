@@ -102,6 +102,8 @@ class Builder:
 
         self.data._input_neurons  = self._temp_data.input_neurons
         self.data._output_neurons = self._temp_data.output_neurons
+        self.data.extra_data["input_sids" ] =  Engine.instance().training_data.inputs.copy()
+        self.data.extra_data["output_sids"] =  Engine.instance().training_data.outputs.copy()
 
     def _calc_effective_deepness(self):
         for n in self.data.neurons:

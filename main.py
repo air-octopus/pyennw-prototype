@@ -3,12 +3,14 @@
 import os
 
 from engine_creator import *
-from engine import Engine
+#from engine import Engine
 #import ennwdb
 #import training_data
 #import transfer_functions as tf
 
-import neural_network_impl.network_builder
+#import neural_network_impl.network_builder
+
+from neural_network import NeuralNetwork
 
 #f = tf.relu
 
@@ -19,7 +21,7 @@ import neural_network_impl.network_builder
 # print("f(17)", f(17, ()))
 
 
-import neural_network_impl as nn
+#import neural_network_impl as nn
 
 # from neural_network_impl.data import Data
 # from neural_network_impl.network_builder import Builder
@@ -35,10 +37,13 @@ if (os.access(".temp/temp.db", os.F_OK)):
 
 create_engine(".temp/temp.db", "data/training-data.json")
 # engine = Engine(".temp/temp.db", "data/training-data.json")
-engine = Engine.instance()
+# engine = Engine.instance()
 
-builder = nn.Builder()
-d = builder.build_protozoan()
+nn = NeuralNetwork(0)
+nn.save()
+
+# builder = nn.Builder()
+# d = builder.build_protozoan()
 
 # nn = engine.neural_network_loader.load_neural_network(0)
 #
