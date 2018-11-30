@@ -2,7 +2,7 @@
 
 import neural_network_impl as nn
 from neural_network_impl.transfer_functions import Type
-from engine import *
+from engine import Engine
 
 class Builder:
 
@@ -14,11 +14,11 @@ class Builder:
 
         @property
         def input_neurons(self):
-            return list(self._map_input_sid2ind[sid] for sid in Engine.instance().training_data.inputs)
+            return list(self._map_input_sid2ind[sid] for sid in Engine.training_data().inputs)
 
         @property
         def output_neurons(self):
-            return list(self._map_output_sid2ind[sid] for sid in Engine.instance().training_data.outputs)
+            return list(self._map_output_sid2ind[sid] for sid in Engine.training_data().outputs)
 
     @property
     def data(self): return self._data
@@ -43,6 +43,47 @@ class Builder:
         data = self._data
         self.__clear()
         return data
+
+    def load_from_db(self, id):
+        """
+        загружает данные нейросети с идентификатором id из базы данных
+        """
+        self._temp_data = Builder.TempData()
+        self._data = nn.Data()
+
+        self._load_synapses(id)
+        self._load_neuron_bodies(id)
+        self._load_neuron_inputs(id)
+        self._load_neuron_outputs(id)
+
+        data = self._data
+        self.__clear()
+        return data
+
+    def _load_synapses(self, nnid):
+        # todo: to be implemented (загрузка из базы данных)
+        synapses_data = self._db.load_synapses_data(nnid)
+        print(len(synapses_data))
+        raise Exception('Not implemented')
+        pass
+
+
+    def _load_neuron_bodies(self, nnid):
+        # todo: to be implemented (загрузка из базы данных)
+        raise Exception('Not implemented')
+        pass
+
+
+    def _load_neuron_inputs(self, nnid):
+        # todo: to be implemented (загрузка из базы данных)
+        raise Exception('Not implemented')
+        pass
+
+
+    def _load_neuron_outputs(self, nnid):
+        # todo: to be implemented (загрузка из базы данных)
+        raise Exception('Not implemented')
+        pass
 
     def __add_receptor(self, input_data_name):
         new_neuron_ind = len(self.data.neurons)
@@ -75,8 +116,8 @@ class Builder:
             * недостающие нейроны-рецепторы и -индикаторы
             * связи между добавленными рецепторами и индикаторами по типу все-со-всеми
         """
-        current_inputs_set  = set(Engine.instance().training_data.inputs)
-        current_outputs_set = set(Engine.instance().training_data.outputs)
+        current_inputs_set  = set(Engine.training_data().inputs)
+        current_outputs_set = set(Engine.training_data().outputs)
         have_inputs_set     = set(self._temp_data._map_input_sid2ind.keys())
         have_outputs_set    = set(self._temp_data._map_output_sid2ind.keys())
 
@@ -102,8 +143,8 @@ class Builder:
 
         self.data._input_neurons  = self._temp_data.input_neurons
         self.data._output_neurons = self._temp_data.output_neurons
-        self.data.extra_data["input_sids" ] =  Engine.instance().training_data.inputs.copy()
-        self.data.extra_data["output_sids"] =  Engine.instance().training_data.outputs.copy()
+        self.data.extra_data["input_sids" ] =  Engine.training_data().inputs.copy()
+        self.data.extra_data["output_sids"] =  Engine.training_data().outputs.copy()
 
     def _calc_effective_deepness(self):
         for n in self.data.neurons:

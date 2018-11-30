@@ -50,11 +50,9 @@ class NeuralNetwork:
         if id == 0:
             self._data = nn.Builder().build_protozoan()
         else:
-            # todo: to be implemented
-            raise Exception('Not implemented')
+            self._data = nn.Builder().load_from_db(id)
 
         # self._data = nn.Data()
-
 
         # self._input_neurons             = []
         # self._output_neurons            = []
@@ -91,40 +89,40 @@ class NeuralNetwork:
 
 
     def save(self):
-        db = Engine.instance().db
-
-        # сохраняем id родительской нейросети и получаем (создаем) id текущей
-        # todo: реализовать вычисление времени отклика, качества и приспособленности НС
-        self.data.nnid = db.save_species(self.data.extra_data["parent"],
-                                    self.data.effective_deepness,
-                                    self.data.response_time,
-                                    self.data.resolving_ability,
-                                    self.data.quality,
-                                    self.data.adaptability)
-
-        # todo: идея с массивом nids мне не нра -- лучше записывать идентификаторы непосредственно в нейроны
-
-        # сохраняем параметры нейронов и получаем их идентификаторы
-        nids = []
-        for o in self.data.neurons:
-            nid = db.save_neuron_body(self.data.nnid, o.transfer_function_type, json.dumps(o.transfer_function_params), len(o.axon))
-            nids.append(nid)
-        # ... теперь nids[i] -- идентификатор i-го нейрона
-
-        # сохраняем информацию о синапсах ...
-        for o in self.data.synapses:
-            db.save_synapse(self.data.nnid, nids[o.src], nids[o.own], o.weight)
-
-        # ... входных ...
-        for z in zip(self.data.input_neurons, self.data.extra_data["input_sids"]):
-            db.save_nn_inputs(self.data.nnid, nids[z[0]], z[1])
-
-        # ... и выходных нейронах
-        for z in zip(self.data.output_neurons, self.data.extra_data["output_sids"]):
-            db.save_nn_outputs(self.data.nnid, nids[z[0]], z[1])
-
-        db.sqldb.commit()
-
+        nn.SaveLoad().save(self._data)
+        # db = Engine.db()
+        #
+        # # сохраняем id родительской нейросети и получаем (создаем) id текущей
+        # # todo: реализовать вычисление времени отклика, качества и приспособленности НС
+        # self.data.nnid = db.save_species(self.data.extra_data["parent"],
+        #                             self.data.effective_deepness,
+        #                             self.data.response_time,
+        #                             self.data.resolving_ability,
+        #                             self.data.quality,
+        #                             self.data.adaptability)
+        #
+        # # todo: идея с массивом nids мне не нра -- лучше записывать идентификаторы непосредственно в нейроны
+        #
+        # # сохраняем параметры нейронов и получаем их идентификаторы
+        # nids = []
+        # for o in self.data.neurons:
+        #     nid = db.save_neuron_body(self.data.nnid, o.transfer_function_type, json.dumps(o.transfer_function_params), len(o.axon))
+        #     nids.append(nid)
+        # # ... теперь nids[i] -- идентификатор i-го нейрона
+        #
+        # # сохраняем информацию о синапсах ...
+        # for o in self.data.synapses:
+        #     db.save_synapse(self.data.nnid, nids[o.src], nids[o.own], o.weight)
+        #
+        # # ... входных ...
+        # for z in zip(self.data.input_neurons, self.data.extra_data["input_sids"]):
+        #     db.save_nn_inputs(self.data.nnid, nids[z[0]], z[1])
+        #
+        # # ... и выходных нейронах
+        # for z in zip(self.data.output_neurons, self.data.extra_data["output_sids"]):
+        #     db.save_nn_outputs(self.data.nnid, nids[z[0]], z[1])
+        #
+        # db.sqldb.commit()
 
     def load_inputs(self, inputs):
         """
