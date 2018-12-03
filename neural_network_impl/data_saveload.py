@@ -20,8 +20,6 @@ class SaveLoad:
                                     data.quality,
                                     data.adaptability)
 
-        # todo: идея с массивом nids мне не нра -- лучше записывать идентификаторы непосредственно в нейроны
-
         neurons = data.neurons
         # сохраняем параметры нейронов и получаем их идентификаторы
         for o in neurons:
@@ -62,6 +60,13 @@ class SaveLoad:
         self._load_neuron_inputs(id)
         self._load_neuron_outputs(id)
         self._load_synapses(id)
+
+        # todo: Нужно выполнять корректировку рецепторов/индикторов под текущие входные и выходные данные (возможно придется пересортировать)
+        # По сути это означает, что основным открытым интерфейсом становится nn.Builder. т.е. стек вызовов будет такой:
+        #       NeuralNetwork.__init__(...)
+        #       --> Builder.load(...)
+        #           --> SaveLoad.load(...)
+        #
 
         data = self.__data
         self.__data = None

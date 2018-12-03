@@ -40,10 +40,10 @@ create_engine(".temp/temp.db", "data/training-data.json")
 # engine = Engine.instance()
 
 nn = NeuralNetwork(0)
-nn.data._response_time     = 14.1234567
-nn.data._resolving_ability = 15.1234567
-nn.data._quality           = 16.1234567
-nn.data._adaptability      = 17.1234567
+# nn.data._response_time     = 14.1234567
+# nn.data._resolving_ability = 15.1234567
+# nn.data._quality           = 16.1234567
+# nn.data._adaptability      = 17.1234567
 nnid = nn.save()
 
 nn2 = NeuralNetwork(nnid)
