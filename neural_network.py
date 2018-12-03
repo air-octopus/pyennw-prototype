@@ -50,7 +50,7 @@ class NeuralNetwork:
         if id == 0:
             self._data = nn.Builder().build_protozoan()
         else:
-            self._data = nn.Builder().load_from_db(id)
+            self._data = nn.SaveLoad().load(id)
 
         # self._data = nn.Data()
 
@@ -89,7 +89,7 @@ class NeuralNetwork:
 
 
     def save(self):
-        nn.SaveLoad().save(self._data)
+        return nn.SaveLoad().save(self._data)
         # db = Engine.db()
         #
         # # сохраняем id родительской нейросети и получаем (создаем) id текущей

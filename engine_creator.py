@@ -14,18 +14,22 @@ from ennwdb import NeuralNetworkDB
 from training_data import TrainingData
 
 def create_engine(db_path: str, training_data_path: str):
-    engine = Engine()
-    engine._db = NeuralNetworkDB()
-    engine.db.open(db_path)
+    db = NeuralNetworkDB()
+    db.open(db_path)
 
-    engine._config = Config(engine)
+    config = Config(db)
 
-    engine._training_data = TrainingData(engine.db)
-    engine.training_data.load_file(training_data_path)
+    training_data = TrainingData(db)
+    training_data.load_file(training_data_path)
 
     # engine.neural_network_loader = NeuralNetworkLoader(engine)
     #
     # engine.conductor = Conductor(engine)
     # engine.evolution_processor = EvolutionProcessor(engine)
+
+    engine = Engine()
+    engine._db = db
+    engine._config = config
+    engine._training_data = training_data
 
     Engine._instance = engine

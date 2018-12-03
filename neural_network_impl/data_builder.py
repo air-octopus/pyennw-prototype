@@ -44,52 +44,52 @@ class Builder:
         self.__clear()
         return data
 
-    def load_from_db(self, id):
-        """
-        загружает данные нейросети с идентификатором id из базы данных
-        """
-        self._temp_data = Builder.TempData()
-        self._data = nn.Data()
-
-        self._load_synapses(id)
-        self._load_neuron_bodies(id)
-        self._load_neuron_inputs(id)
-        self._load_neuron_outputs(id)
-
-        data = self._data
-        self.__clear()
-        return data
-
-    def _load_synapses(self, nnid):
-        # todo: to be implemented (загрузка из базы данных)
-        synapses_data = self._db.load_synapses_data(nnid)
-        print(len(synapses_data))
-        raise Exception('Not implemented')
-        pass
-
-
-    def _load_neuron_bodies(self, nnid):
-        # todo: to be implemented (загрузка из базы данных)
-        raise Exception('Not implemented')
-        pass
-
-
-    def _load_neuron_inputs(self, nnid):
-        # todo: to be implemented (загрузка из базы данных)
-        raise Exception('Not implemented')
-        pass
-
-
-    def _load_neuron_outputs(self, nnid):
-        # todo: to be implemented (загрузка из базы данных)
-        raise Exception('Not implemented')
-        pass
+    # def load_from_db(self, id):
+    #     """
+    #     загружает данные нейросети с идентификатором id из базы данных
+    #     """
+    #     self._temp_data = Builder.TempData()
+    #     self._data = nn.Data()
+    #
+    #     self._load_synapses(id)
+    #     self._load_neuron_bodies(id)
+    #     self._load_neuron_inputs(id)
+    #     self._load_neuron_outputs(id)
+    #
+    #     data = self._data
+    #     self.__clear()
+    #     return data
+    #
+    # def _load_synapses(self, nnid):
+    #     # todo: to be implemented (загрузка из базы данных)
+    #     synapses_data = Engine.db().load_synapses_data(nnid)
+    #     print(len(synapses_data))
+    #     raise Exception('Not implemented')
+    #     pass
+    #
+    #
+    # def _load_neuron_bodies(self, nnid):
+    #     # todo: to be implemented (загрузка из базы данных)
+    #     raise Exception('Not implemented')
+    #     pass
+    #
+    #
+    # def _load_neuron_inputs(self, nnid):
+    #     # todo: to be implemented (загрузка из базы данных)
+    #     raise Exception('Not implemented')
+    #     pass
+    #
+    #
+    # def _load_neuron_outputs(self, nnid):
+    #     # todo: to be implemented (загрузка из базы данных)
+    #     raise Exception('Not implemented')
+    #     pass
 
     def __add_receptor(self, input_data_name):
         new_neuron_ind = len(self.data.neurons)
         new_neuron_tf = Type.relu
         new_neuron_tf_params = ()
-        new_neuron = nn.Neuron([0], new_neuron_tf, new_neuron_tf_params)
+        new_neuron = nn.Neuron(None, [0], new_neuron_tf, new_neuron_tf_params)
 
         self._temp_data._map_input_sid2ind [input_data_name] = new_neuron_ind
         self.data.neurons.append(new_neuron)
@@ -98,7 +98,7 @@ class Builder:
         new_neuron_ind = len(self.data.neurons)
         new_neuron_tf = Type.linear
         new_neuron_tf_params = ()
-        new_neuron = nn.Neuron([0, 0], new_neuron_tf, new_neuron_tf_params)
+        new_neuron = nn.Neuron(None, [0, 0], new_neuron_tf, new_neuron_tf_params)
         # В настоящее время при создании нейрона-индикатора он присоединяется напрямую к рецептору
         # (у которого глубина по-определению равна нулю),
         # поэтому в данном случае глубина индикатора будет 1
@@ -140,6 +140,8 @@ class Builder:
                 self._data._synapses.append(nn.Synapse(src, own, 1)) # todo: вынести значение веса по-умолчанию в настройки
 
         # todo: добавить реализацию для удаления рецепторов и/или индикаторов
+
+        # todo: добавить сортировку рецепторооов и индикаторов в соответствии с порядком Engine.training_data().in/out
 
         self.data._input_neurons  = self._temp_data.input_neurons
         self.data._output_neurons = self._temp_data.output_neurons
