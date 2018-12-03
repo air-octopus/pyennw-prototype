@@ -268,7 +268,7 @@ class NeuralNetworkDB:
                 %d, 1, %d, %.7f, %.7f, %.7f, %.7f
             )
         """ % (
-            parent_id
+            parent_id or 0
             , effective_deepness
             , response_time
             , resolving_ability

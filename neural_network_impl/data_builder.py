@@ -44,47 +44,6 @@ class Builder:
         self.__clear()
         return data
 
-    # def load_from_db(self, id):
-    #     """
-    #     загружает данные нейросети с идентификатором id из базы данных
-    #     """
-    #     self._temp_data = Builder.TempData()
-    #     self._data = nn.Data()
-    #
-    #     self._load_synapses(id)
-    #     self._load_neuron_bodies(id)
-    #     self._load_neuron_inputs(id)
-    #     self._load_neuron_outputs(id)
-    #
-    #     data = self._data
-    #     self.__clear()
-    #     return data
-    #
-    # def _load_synapses(self, nnid):
-    #     # todo: to be implemented (загрузка из базы данных)
-    #     synapses_data = Engine.db().load_synapses_data(nnid)
-    #     print(len(synapses_data))
-    #     raise Exception('Not implemented')
-    #     pass
-    #
-    #
-    # def _load_neuron_bodies(self, nnid):
-    #     # todo: to be implemented (загрузка из базы данных)
-    #     raise Exception('Not implemented')
-    #     pass
-    #
-    #
-    # def _load_neuron_inputs(self, nnid):
-    #     # todo: to be implemented (загрузка из базы данных)
-    #     raise Exception('Not implemented')
-    #     pass
-    #
-    #
-    # def _load_neuron_outputs(self, nnid):
-    #     # todo: to be implemented (загрузка из базы данных)
-    #     raise Exception('Not implemented')
-    #     pass
-
     def __add_receptor(self, input_data_name):
         new_neuron_ind = len(self.data.neurons)
         new_neuron_tf = Type.relu
