@@ -21,6 +21,8 @@ c = tf.gather(b, bc)
 print(tf.Session().run(b))
 print(tf.Session().run(c))
 
+tf.zeros()
+
 # результат:
 #   [6 4 3 3]
 #   [6 6 6 4 3 3]
