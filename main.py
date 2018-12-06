@@ -39,6 +39,19 @@ create_engine(".temp/temp.db", "data/training-data.json")
 # engine = Engine(".temp/temp.db", "data/training-data.json")
 # engine = Engine.instance()
 
+td = Engine.training_data()
+ts = td.training_set()
+# for o in ts:
+#     print([o.data_in, o.data_out])
+print(ts.next())
+print(ts.next())
+print(ts.next())
+print(ts.next())
+print(ts.next())
+#print(ts[1])
+#print(ts[2])
+#print(ts[3])
+
 nn = NeuralNetwork(0)
 # nn.data._response_time     = 14.1234567
 # nn.data._resolving_ability = 15.1234567
