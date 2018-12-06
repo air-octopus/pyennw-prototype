@@ -163,7 +163,7 @@ data_out = [0, 1, 1, 0]
 
 merged = tf.summary.merge_all()
 
-file_writer = tf.summary.FileWriter('/home/maksko/-/Temp/001/' + str(datetime.datetime.now()), graph)
+file_writer = tf.summary.FileWriter('/home/maksko/-/temp/001/' + str(datetime.datetime.now()), graph)
 
 # Обучаем
 train_step = optim.minimize(loss)

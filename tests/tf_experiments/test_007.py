@@ -147,7 +147,7 @@ data_out = [0, 1, 1, 0]
 
 merged = tf.summary.merge_all()
 
-file_writer = tf.summary.FileWriter('/home/maksko/-/Temp/001', graph)
+file_writer = tf.summary.FileWriter('/home/maksko/-/temp/001', graph)
 
 # Обучаем
 # train_step = tf.train.GradientDescentOptimizer(0.025).minimize(loss)

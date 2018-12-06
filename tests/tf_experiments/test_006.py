@@ -34,7 +34,7 @@ tf.summary.scalar('grads', grads_and_vars[0][0])
 tf.summary.scalar('vars', grads_and_vars[0][1])
 
 merged_summary = tf.summary.merge_all()
-summary_writer = tf.summary.FileWriter('/home/maksko/-/Temp/001', graph)
+summary_writer = tf.summary.FileWriter('/home/maksko/-/temp/001', graph)
 
 # Инициализируем переменные
 init = tf.global_variables_initializer()
