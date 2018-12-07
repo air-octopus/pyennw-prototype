@@ -5,6 +5,10 @@ class Neuron:
     Класс-структура, описывающий один нейрон
     """
 
+    @property
+    def is_receptor(self):
+        return True if len(self.axon) == 1 else False
+
     def __init__(self, id, axon, transfer_function_type, transfer_function_params):
         """
         :param axon: массив-очередь вещественных чисел -- данных нейрона (аксон)

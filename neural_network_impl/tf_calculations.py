@@ -14,11 +14,17 @@ N!B! в настоящее время поддерживаются только 
     * out: выходные данные
     * p# : разного рода промежуточные данные
 
+индексы для векторизованного представления НС:
+    * indx_a2_for_in  : индексы нейронов, которые используются как вход для синапсов
+    * indx_extin_to_w : индексы для адаптации расширенного входа к w
+    * indx_w_to_a1    : индексы для аккумулирования результатов вычислений на синапсах во входах аксонов
+    * indx_a2_to_out  : индексы для сбора выходных данных
+
 Calculator работает в двух режимах:
     * режим обучения НС
     * режим вычислений на НС
 
-В режиме обучения:
+в режиме обучения:
     * изначально задается необходимое количество итераций в одном батче
     * нейросеть разворачивается сразу на все итерации
     * все итерации в одном батче вычисляются как единое целое
@@ -26,7 +32,7 @@ Calculator работает в двух режимах:
     * требуется функция потерь, которая учитывает сразу все ответы нейросети
     * веса задаются как tf.Variable
     * начальные данные аксонов инициализируются нулями, и в дальнейшем аккумулируют в себе все предыдущие вычисления
-В режиме вычислений:
+в режиме вычислений:
     * есть возможность выполнять произвольное количество итераций
     * нейросеть не разворачивается
     * все вычисления производятся по одной итерации за раз
@@ -36,16 +42,15 @@ Calculator работает в двух режимах:
     * в конце итерации извлекаются данные a2, out. Значения out накапливаются в списке,
       а a2 используется для выполнения следующей итерации
 
-В режиме вычислений
-
 Последовательность:
      ----- init
      * a2  <- zeros
      ----- cycle
-  ,->* a1  <- zeros
-  |  * p1  <- tf.dynamic_stitch([in, a2])
-  |  * p2  <- tf.gather(p1)                   # адаптируем к w
+  ,->* p1  <- tf.gather(a2)                 # выделяем только те a2, которые используются как входные данные
+  |  * p1  <- tf.dynamic_stitch([in, a2])   # расширенные входные данные (вход НС + internal)
+  |  * p2  <- tf.gather(p1)                 # адаптируем к w
   |  * p3  <- tf.multiply(p2, w)
+     * a1  <- zeros
   |  * a1  <- tf.scatter_add(a1, p3)
   |  * a2  <- a1
   |  * out <- tf.gather(a2)
@@ -54,17 +59,84 @@ Calculator работает в двух режимах:
 
 import tensorflow as tf
 import neural_network
+import neural_network_impl as nn
 from engine import Engine
+
+from collections import defaultdict
 
 class Calculator:
 
-    def __init__(self, nn : neural_network.NeuralNetwork):
-        self._neural_network = nn
+    def __init__(self, neural_network : neural_network.NeuralNetwork):
+        self._neural_network = neural_network
+
+        class NeuronExtended:
+            def __init__(self, n : nn.Neuron):
+                pass
+
+        d = neural_network.data
+
+        # Разделим все нейроны на рецепторы и рабочие нейроны.
+        # Компонент 'in' соответствует рецепторам, а компоненты a1 и a2 -- рабочим нейронам
+        self._receptors = [n for n in d.neurons if n.is_receptor()]
+        self._worker    = [n for n in d.neurons if not n.is_receptor()]
+
+
+
+
+
+        # надо:
+        #   * input_ind  -> synapse_ind
+        #   * worker_ind -> synapse_ind
+        # есть:
+        #   * input_ind -> input_sid    (т.к. есть массив input_sid)
+        #   * neuron_ind <-> input_sid  (т.к. есть связанные массивы input_neurons и extra_data.input_sid)
+        #   * sinapse_ind -> neuron_ind
+        #
+        # делаем:
+        #   * input_ind -> neuron_ind
+        #
+        # input_sid -> input_ind
+
+        neuron_ind_to_synapse_ind = defaultdict(list)
+        for synapse_ind, synapse in enumerate(d.synapses):
+            neuron_ind_to_synapse_ind[synapse.src].append(synapse_ind)
+
+        input_sid_to_neuron_ind = {}
+        for i, sid in enumerate(d.extra_data["input_sids"]):
+            input_sid_to_neuron_ind[sid] = d.input_neurons[i]
+
+
+
+
+
+        # длины векторов в векторизованном представлении нейросети (для одной итерации)
+        self._in_len  = len(self._receptors )
+        self._a1_len  = len(self._worker    )
+        self._a2_len  = len(self._worker    )
+        self._w_len   = len(d.synapses      )
+        self._out_len = len(d.output_neurons)
+
+        # индексы для векторизованного представления нейросети
+
+        def build_indx_a2_for_in(self):
+            indx = list({synapse.src for synapse in d.synapses})
+            indx.sort()
+            return indx
+
+        def build_indx_extin_to_w(self):
+            pass
+
+        self.indx_a2_for_in = build_indx_a2_for_in()
+        # * indx_extin_to_w : индексы для адаптации расширенного входа к w
+        # * indx_w_to_a1    : индексы для аккумулирования результатов вычислений на синапсах во входах аксонов
+        # * indx_a2_to_out  : индексы для сбора выходных данных
+
+        self._a_zeros_init = tf.constant()
+
         self.clear()
 
     def clear(self):
         nn = self._neural_network
-        d = nn.data
 
         # все компоненты представлены списками, т.к. для обучени НС итерации вычислений
         # должны быть развернуты на один батч. Соответственно каждой итерации соответствует один элемент в списке.
@@ -75,15 +147,44 @@ class Calculator:
         self._w   = []
         self._out = []
 
-        self._in_shape  = [len(d.input_neurons )]
-        self._a1_shape  = [len(d.neurons       )]
-        self._a2_shape  = [len(d.neurons       )]
-        self._w_shape   = [len(d.synapses      )]
-        self._out_shape = [len(d.output_neurons)]
+        # self._in_shape  = [len(d.input_neurons )]
+        # self._a1_shape  = [len(d.neurons       )]
+        # self._a2_shape  = [len(d.neurons       )]
+        # self._w_shape   = [len(d.synapses      )]
+        # self._out_shape = [len(d.output_neurons)]
 
         self._training_data = Engine.training_data()
 
     def _add_iteration_for_training(self):
-        #inputs =
+        """
+        В режиме тренировки нейросеть разворачивается сразу на несколько итераций.
+        :return:
+        """
+        # номер итерации (в батче)
+        it_num = len(self._in)
+
+        # входные данные
+        it_in = tf.placeholder(dtype=tf.float32, shape=[self._in_len], name="input_value[%d]" % it_num)
+
+
 
         pass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
