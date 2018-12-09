@@ -84,6 +84,8 @@ class SaveLoad:
     def _load_neuron_inputs(self, nnid):
         map_neuron_id2ind = self.__data.map_neuron_id2ind
         inputs = Engine.db().load_nn_inputs(nnid)
+        inputs_inds = {sid: ind for ind, sid in enumerate(Engine.training_data().inputs)}
+        inputs.sort(key = lambda x: inputs_inds[x[1]])
         self.__data._input_neurons            = [ map_neuron_id2ind[id] for id, input_sid in inputs ]
         self.__data._extra_data["input_sids"] = [ input_sid             for id, input_sid in inputs ]
 

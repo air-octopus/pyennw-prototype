@@ -77,10 +77,14 @@ class Calculator:
 
         # Разделим все нейроны на рецепторы и рабочие нейроны.
         # Компонент 'in' соответствует рецепторам, а компоненты a1 и a2 -- рабочим нейронам
-        self._receptors = [n for n in d.neurons if n.is_receptor()]
-        self._worker    = [n for n in d.neurons if not n.is_receptor()]
+#        self._receptors = [(i, n) for i, n in enumerate(d.neurons) if n.is_receptor]
+        self._worker    = [(i, n) for i, n in enumerate(d.neurons) if not n.is_receptor]
 
+        # отображения индексов нейронов в индексы рецепторов и рабочих нейронов
+        neuron_ind_to_receptor_ind = {n: r for r,  n      in enumerate(d.input_neurons)}
+        neuron_ind_to_worker_ind   = {n: w for w, (n, o)  in enumerate(self._worker)}
 
+        # отсортируем рецепторы в соответствии
 
 
 
@@ -97,41 +101,53 @@ class Calculator:
         #
         # input_sid -> input_ind
 
-        neuron_ind_to_synapse_ind = defaultdict(list)
-        for synapse_ind, synapse in enumerate(d.synapses):
-            neuron_ind_to_synapse_ind[synapse.src].append(synapse_ind)
+        # neuron_ind_to_synapse_ind = defaultdict(list)
+        # for synapse_ind, synapse in enumerate(d.synapses):
+        #     neuron_ind_to_synapse_ind[synapse.src].append(synapse_ind)
+        #
+        # input_sid_to_neuron_ind = {}
+        # for i, sid in enumerate(d.extra_data["input_sids"]):
+        #     input_sid_to_neuron_ind[sid] = d.input_neurons[i]
 
-        input_sid_to_neuron_ind = {}
-        for i, sid in enumerate(d.extra_data["input_sids"]):
-            input_sid_to_neuron_ind[sid] = d.input_neurons[i]
+        synapse_neuron_in_neuron_out_is_receptor = [[synapse_ind, synapse.src, d.neurons[synapse.src].is_receptor] for synapse_ind, synapse in enumerate(d.synapses)]
+#        neuron_synapse_indices.sort(key = lambda x: not d.neurons[x[1]].is_receptor)
 
+        info_gather_receptors = [(synapse_ind, neuron_ind_to_receptor_ind[neuron_in_ind]) for synapse_ind, neuron_in_ind, neuron_out_ind, is_receptor in synapse_neuron_in_neuron_out_is_receptor if is_receptor is True]
+        info_gather_workers   = [(synapse_ind, neuron_ind_to_worker_ind  [neuron_in_ind]) for synapse_ind, neuron_in_ind, neuron_out_ind, is_receptor in synapse_neuron_in_neuron_out_is_receptor if is_receptor is False]
 
+        self._indices_gather_receptors   = [o[1] for o in info_gather_receptors]
+        self._indices_gather_workers     = [o[1] for o in info_gather_workers  ]
 
+        self._indices_stitch_receptors   = [o[0] for o in info_gather_receptors]
+        self._indices_stitch_workers     = [o[0] for o in info_gather_workers  ]
 
+        self._indices_scater_add_workers = [neuron_out_ind for synapse_ind, neuron_in_ind, neuron_out_ind, is_receptor in synapse_neuron_in_neuron_out_is_receptor if is_receptor is False]
+
+        self._indices_gather_indicators  = [neuron_ind_to_worker_ind[neuron_ind] for neuron_ind in d.output_neurons]
 
         # длины векторов в векторизованном представлении нейросети (для одной итерации)
-        self._in_len  = len(self._receptors )
+        self._in_len  = len(d.input_neurons )
         self._a1_len  = len(self._worker    )
         self._a2_len  = len(self._worker    )
         self._w_len   = len(d.synapses      )
         self._out_len = len(d.output_neurons)
 
-        # индексы для векторизованного представления нейросети
+        # # индексы для векторизованного представления нейросети
+        #
+        # def build_indx_a2_for_in(self):
+        #     indx = list({synapse.src for synapse in d.synapses})
+        #     indx.sort()
+        #     return indx
+        #
+        # def build_indx_extin_to_w(self):
+        #     pass
+        #
+        # self.indx_a2_for_in = build_indx_a2_for_in()
+        # # * indx_extin_to_w : индексы для адаптации расширенного входа к w
+        # # * indx_w_to_a1    : индексы для аккумулирования результатов вычислений на синапсах во входах аксонов
+        # # * indx_a2_to_out  : индексы для сбора выходных данных
 
-        def build_indx_a2_for_in(self):
-            indx = list({synapse.src for synapse in d.synapses})
-            indx.sort()
-            return indx
-
-        def build_indx_extin_to_w(self):
-            pass
-
-        self.indx_a2_for_in = build_indx_a2_for_in()
-        # * indx_extin_to_w : индексы для адаптации расширенного входа к w
-        # * indx_w_to_a1    : индексы для аккумулирования результатов вычислений на синапсах во входах аксонов
-        # * indx_a2_to_out  : индексы для сбора выходных данных
-
-        self._a_zeros_init = tf.constant()
+        self._a_zeros_init = tf.constant([0] * self._a1_len)
 
         self.clear()
 
@@ -142,8 +158,7 @@ class Calculator:
         # должны быть развернуты на один батч. Соответственно каждой итерации соответствует один элемент в списке.
 
         self._in  = []
-        self._a1  = []
-        self._a2  = []
+        self._a   = []
         self._w   = []
         self._out = []
 
@@ -164,7 +179,20 @@ class Calculator:
         it_num = len(self._in)
 
         # входные данные
-        it_in = tf.placeholder(dtype=tf.float32, shape=[self._in_len], name="input_value[%d]" % it_num)
+        receptors = tf.placeholder(dtype=tf.float32, shape=[self._in_len], name="input_value[%d]" % it_num)
+
+        # текущие выходные значения рабочих нейронов
+        a2 = self._a[-1] if len(self._a) > 0 else self._a_zeros_init
+
+        # подготавливаем данные для свертки с массивом весов
+        p1 = tf.gather(receptors, self._indices_gather_receptors)
+        p2 = tf.gather(a2, self._indices_gather_workers)
+        p3 = tf.dynamic_stitch([self._indices_stitch_receptors, self._indices_stitch_workers], [p1, p2])
+
+        a1 = tf.Variable([0] * self._a1_len)
+        a1 = tf.scatter_add(a1, self._indices_scater_add_workers, p3)
+
+        indicators = tf.gather(a1, self._indices_gather_indicators)
 
 
 
