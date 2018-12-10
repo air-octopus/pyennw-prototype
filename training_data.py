@@ -79,6 +79,12 @@ class TrainingData:
     def training_set_size(self):
         return len(self._training_set)
 
+    def training_set_loopped(self):
+        while True:
+            for ts in self._training_set:
+                yield TrainingData.Row(ts["in"], ts["out"])
+                # yield (ts["in"], ts["out"])
+
     def training_set(self):
         for ts in self._training_set:
             yield TrainingData.Row(ts["in"], ts["out"])

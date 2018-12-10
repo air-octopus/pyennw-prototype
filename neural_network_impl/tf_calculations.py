@@ -64,53 +64,45 @@ from engine import Engine
 
 from collections import defaultdict
 
-class Calculator:
+class _Calculator_impl:
 
     def __init__(self, neural_network : neural_network.NeuralNetwork):
+        # Исходная нейросеть
         self._neural_network = neural_network
 
-        class NeuronExtended:
-            def __init__(self, n : nn.Neuron):
-                pass
+        # Внутренние данные класса Calculator зависятот того
+
+        # Массивы тензоров векторизованного представления нейросети.
+        #
+        # В режиме тренировки нейросети входные данные бьются на батчи по несколько записей.
+        # Каждой записи соответствует одна итерация работы нейросети и, соответственно,
+        # один элемент в этих массивах
+        #
+        # В режиме простых вычислений все массивы содержат только по одному элементу
+
+        # массив tf-плейсхолдеров для входных данных.
+        self._in  = None
+        # массив данных в аксонах
+        self._a   = None
+        # массив выходных данных
+        self._out = None
+
+        # тензор весов.
+        # В режиме тренировки представляет собой экземпляр tf.Variable()
+        # В режиме вычислений -- tf.constant
+        self._w   = None
 
         d = neural_network.data
 
         # Разделим все нейроны на рецепторы и рабочие нейроны.
         # Компонент 'in' соответствует рецепторам, а компоненты a1 и a2 -- рабочим нейронам
-#        self._receptors = [(i, n) for i, n in enumerate(d.neurons) if n.is_receptor]
         self._worker    = [(i, n) for i, n in enumerate(d.neurons) if not n.is_receptor]
 
         # отображения индексов нейронов в индексы рецепторов и рабочих нейронов
         neuron_ind_to_receptor_ind = {n: r for r,  n      in enumerate(d.input_neurons)}
         neuron_ind_to_worker_ind   = {n: w for w, (n, o)  in enumerate(self._worker)}
 
-        # отсортируем рецепторы в соответствии
-
-
-
-        # надо:
-        #   * input_ind  -> synapse_ind
-        #   * worker_ind -> synapse_ind
-        # есть:
-        #   * input_ind -> input_sid    (т.к. есть массив input_sid)
-        #   * neuron_ind <-> input_sid  (т.к. есть связанные массивы input_neurons и extra_data.input_sid)
-        #   * sinapse_ind -> neuron_ind
-        #
-        # делаем:
-        #   * input_ind -> neuron_ind
-        #
-        # input_sid -> input_ind
-
-        # neuron_ind_to_synapse_ind = defaultdict(list)
-        # for synapse_ind, synapse in enumerate(d.synapses):
-        #     neuron_ind_to_synapse_ind[synapse.src].append(synapse_ind)
-        #
-        # input_sid_to_neuron_ind = {}
-        # for i, sid in enumerate(d.extra_data["input_sids"]):
-        #     input_sid_to_neuron_ind[sid] = d.input_neurons[i]
-
         synapse_neuron_in_neuron_out_is_receptor = [[synapse_ind, synapse.src, d.neurons[synapse.src].is_receptor] for synapse_ind, synapse in enumerate(d.synapses)]
-#        neuron_synapse_indices.sort(key = lambda x: not d.neurons[x[1]].is_receptor)
 
         info_gather_receptors = [(synapse_ind, neuron_ind_to_receptor_ind[neuron_in_ind]) for synapse_ind, neuron_in_ind, neuron_out_ind, is_receptor in synapse_neuron_in_neuron_out_is_receptor if is_receptor is True]
         info_gather_workers   = [(synapse_ind, neuron_ind_to_worker_ind  [neuron_in_ind]) for synapse_ind, neuron_in_ind, neuron_out_ind, is_receptor in synapse_neuron_in_neuron_out_is_receptor if is_receptor is False]
@@ -132,48 +124,39 @@ class Calculator:
         self._w_len   = len(d.synapses      )
         self._out_len = len(d.output_neurons)
 
-        # # индексы для векторизованного представления нейросети
-        #
-        # def build_indx_a2_for_in(self):
-        #     indx = list({synapse.src for synapse in d.synapses})
-        #     indx.sort()
-        #     return indx
-        #
-        # def build_indx_extin_to_w(self):
-        #     pass
-        #
-        # self.indx_a2_for_in = build_indx_a2_for_in()
-        # # * indx_extin_to_w : индексы для адаптации расширенного входа к w
-        # # * indx_w_to_a1    : индексы для аккумулирования результатов вычислений на синапсах во входах аксонов
-        # # * indx_a2_to_out  : индексы для сбора выходных данных
-
         self._a_zeros_init = tf.constant([0] * self._a1_len)
 
-        self.clear()
-
     def clear(self):
-        nn = self._neural_network
+#        nn = self._neural_network
 
-        # все компоненты представлены списками, т.к. для обучени НС итерации вычислений
+        # все компоненты представлены списками, т.к. для обучения НС итерации вычислений
         # должны быть развернуты на один батч. Соответственно каждой итерации соответствует один элемент в списке.
 
         self._in  = []
         self._a   = []
-        self._w   = []
         self._out = []
+        self._w   = None
+    #
+    # def init_for_training(self, iterations_count):
+    #     self.clear()
+    #     self._w = tf.Variable([synapse.weight for synapse in self._neural_network.data.synapses])
+    #
+    # def _add_iteration_for_training(self):
+    #     # текущие выходные значения рабочих нейронов
+    #     a2 = self._a[-1] if len(self._a) > 0 else self._a_zeros_init
+    #
+    #     self.__add_iteration_body(a2)
 
-        # self._in_shape  = [len(d.input_neurons )]
-        # self._a1_shape  = [len(d.neurons       )]
-        # self._a2_shape  = [len(d.neurons       )]
-        # self._w_shape   = [len(d.synapses      )]
-        # self._out_shape = [len(d.output_neurons)]
-
-        self._training_data = Engine.training_data()
-
-    def _add_iteration_for_training(self):
+    def _build_iteration_body(self, a2):
         """
-        В режиме тренировки нейросеть разворачивается сразу на несколько итераций.
-        :return:
+        Основное содержимое одной итерации вычислений
+        :param a2:  текущее содержимое аксонов рабочих нейронов.
+                    Представляется в виде tf-тензора.
+                    Используется как вход для вычислений
+        :return: кортеж (receptors, a1, indicators)
+                    receptors -- плейсхолдеры для входных данных
+                    a1 -- результат вычислений на рабочих нейронах
+                    indixcators -- выходные данные (tf-тензоры)
         """
         # номер итерации (в батче)
         it_num = len(self._in)
@@ -181,38 +164,64 @@ class Calculator:
         # входные данные
         receptors = tf.placeholder(dtype=tf.float32, shape=[self._in_len], name="input_value[%d]" % it_num)
 
-        # текущие выходные значения рабочих нейронов
-        a2 = self._a[-1] if len(self._a) > 0 else self._a_zeros_init
-
         # подготавливаем данные для свертки с массивом весов
         p1 = tf.gather(receptors, self._indices_gather_receptors)
         p2 = tf.gather(a2, self._indices_gather_workers)
         p3 = tf.dynamic_stitch([self._indices_stitch_receptors, self._indices_stitch_workers], [p1, p2])
 
-        a1 = tf.Variable([0] * self._a1_len)
+        a1 = tf.Variable([0] * self._a1_len, trainable=False)
         a1 = tf.scatter_add(a1, self._indices_scater_add_workers, p3)
 
         indicators = tf.gather(a1, self._indices_gather_indicators)
 
+        return (receptors, a1, indicators)
 
+class Trainer(_Calculator_impl):
+    def __init__(self, neural_network : neural_network.NeuralNetwork):
+        super().__init__(neural_network)
+
+        # Массивы тензоров векторизованного представления нейросети.
+        #
+        # В режиме тренировки нейросети входные данные бьются на батчи по несколько записей.
+        # Каждой записи соответствует одна итерация работы нейросети и, соответственно,
+        # один элемент в этих массивах
+
+        # массив tf-плейсхолдеров для входных данных.
+        self._in  = None
+        # массив данных в аксонах
+        self._a   = None
+        # массив выходных данных
+        self._out = None
+
+        # тензор весов.
+        # В режиме тренировки представляет собой экземпляр tf.Variable()
+        self._w   = None
+
+    def init(self, iterations_count):
+        # все компоненты представлены списками, т.к. для обучения НС итерации вычислений
+        # должны быть развернуты на один батч. Соответственно каждой итерации соответствует один элемент в списке.
+        self._in  = []
+        self._a   = []
+        self._out = []
+        self._w = tf.Variable([synapse.weight for synapse in self._neural_network.data.synapses])
+        for i in range(iterations_count):
+            self._add_iteration()
+
+    def _add_iteration(self):
+        """
+        В режиме тренировки нейросеть разворачивается сразу на несколько итераций.
+        """
+        # текущие выходные значения рабочих нейронов
+        a2 = self._a[-1] if len(self._a) > 0 else self._a_zeros_init
+
+        receptors, a1, indicators = self._build_iteration_body(a2)
+
+        self._in .append(receptors )
+        self._a  .append(a1        )
+        self._out.append(indicators)
+
+    def training(self):
+        sess = tf.Session()
+        sess.run(tf.global_variables_initializer())
 
         pass
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
