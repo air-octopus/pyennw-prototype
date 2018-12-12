@@ -70,6 +70,8 @@ class _Calculator_impl:
         # Исходная нейросеть
         self._neural_network = neural_network
 
+        self._ppp = []
+
         # Внутренние данные класса Calculator зависятот того
 
         # Массивы тензоров векторизованного представления нейросети.
@@ -102,7 +104,7 @@ class _Calculator_impl:
         neuron_ind_to_receptor_ind = {n: r for r,  n      in enumerate(d.input_neurons)}
         neuron_ind_to_worker_ind   = {n: w for w, (n, o)  in enumerate(self._worker)}
 
-        synapse_neuron_in_neuron_out_is_receptor = [[synapse_ind, synapse.src, d.neurons[synapse.src].is_receptor] for synapse_ind, synapse in enumerate(d.synapses)]
+        synapse_neuron_in_neuron_out_is_receptor = [[synapse_ind, synapse.src, synapse.own, d.neurons[synapse.src].is_receptor] for synapse_ind, synapse in enumerate(d.synapses)]
 
         info_gather_receptors = [(synapse_ind, neuron_ind_to_receptor_ind[neuron_in_ind]) for synapse_ind, neuron_in_ind, neuron_out_ind, is_receptor in synapse_neuron_in_neuron_out_is_receptor if is_receptor is True]
         info_gather_workers   = [(synapse_ind, neuron_ind_to_worker_ind  [neuron_in_ind]) for synapse_ind, neuron_in_ind, neuron_out_ind, is_receptor in synapse_neuron_in_neuron_out_is_receptor if is_receptor is False]
@@ -113,7 +115,10 @@ class _Calculator_impl:
         self._indices_stitch_receptors   = [o[0] for o in info_gather_receptors]
         self._indices_stitch_workers     = [o[0] for o in info_gather_workers  ]
 
-        self._indices_scater_add_workers = [neuron_out_ind for synapse_ind, neuron_in_ind, neuron_out_ind, is_receptor in synapse_neuron_in_neuron_out_is_receptor if is_receptor is False]
+        info_scatter_add_workers = [(synapse_ind, neuron_ind_to_worker_ind[neuron_out_ind]) for synapse_ind, neuron_in_ind, neuron_out_ind, is_receptor in synapse_neuron_in_neuron_out_is_receptor]
+        info_scatter_add_workers.sort(key=lambda x: x[1])
+        self._indices_gather_synapses_for_sum = [o[0] for o in info_scatter_add_workers]
+        self._indices_segment_sum_synapses    = [o[1] for o in info_scatter_add_workers]
 
         self._indices_gather_indicators  = [neuron_ind_to_worker_ind[neuron_ind] for neuron_ind in d.output_neurons]
 
@@ -136,16 +141,6 @@ class _Calculator_impl:
         self._a   = []
         self._out = []
         self._w   = None
-    #
-    # def init_for_training(self, iterations_count):
-    #     self.clear()
-    #     self._w = tf.Variable([synapse.weight for synapse in self._neural_network.data.synapses])
-    #
-    # def _add_iteration_for_training(self):
-    #     # текущие выходные значения рабочих нейронов
-    #     a2 = self._a[-1] if len(self._a) > 0 else self._a_zeros_init
-    #
-    #     self.__add_iteration_body(a2)
 
     def _build_iteration_body(self, a2):
         """
@@ -162,17 +157,44 @@ class _Calculator_impl:
         it_num = len(self._in)
 
         # входные данные
-        receptors = tf.placeholder(dtype=tf.float32, shape=[self._in_len], name="input_value[%d]" % it_num)
+        receptors = tf.placeholder(dtype=tf.float32, shape=[self._in_len], name="input_value_%d" % it_num)
+
+        self._ppp.append((receptors, "receptors"))
 
         # подготавливаем данные для свертки с массивом весов
-        p1 = tf.gather(receptors, self._indices_gather_receptors)
-        p2 = tf.gather(a2, self._indices_gather_workers)
-        p3 = tf.dynamic_stitch([self._indices_stitch_receptors, self._indices_stitch_workers], [p1, p2])
+        stitch_ind = []
+        stitch_src = []
 
-        a1 = tf.Variable([0] * self._a1_len, trainable=False)
-        a1 = tf.scatter_add(a1, self._indices_scater_add_workers, p3)
+        if len(self._indices_gather_receptors) > 0 and len(self._indices_stitch_receptors) > 0:
+            p1 = tf.gather(receptors, self._indices_gather_receptors)
+            stitch_ind.append(self._indices_stitch_receptors)
+            stitch_src.append(p1)
+            self._ppp.append((p1, "p1"))
+        else:
+            assert len(self._indices_gather_receptors) + len(self._indices_stitch_receptors) == 0, "Indices can be empty only together"
+
+        if len(self._indices_gather_workers) > 0 and len(self._indices_stitch_workers) > 0:
+            p2 = tf.gather(a2, self._indices_gather_workers)
+            stitch_ind.append(self._indices_stitch_workers)
+            stitch_src.append(p2)
+            self._ppp.append((p2, "p2"))
+        else:
+            assert len(self._indices_gather_workers) + len(self._indices_stitch_workers) == 0, "Indices can be empty only together"
+
+        p3 = tf.dynamic_stitch(stitch_ind, stitch_src)
+        self._ppp.append((p3, "p3"))
+
+        p4 = p3 * self._w
+        self._ppp.append((p4, "p4"))
+
+        p5 = tf.gather(p4, self._indices_gather_synapses_for_sum)
+        self._ppp.append((p5, "p5"))
+
+        a1 = tf.segment_sum(p5, self._indices_segment_sum_synapses)
+        self._ppp.append((a1, "a1"))
 
         indicators = tf.gather(a1, self._indices_gather_indicators)
+        self._ppp.append((indicators, "indicators"))
 
         return (receptors, a1, indicators)
 
@@ -197,15 +219,60 @@ class Trainer(_Calculator_impl):
         # В режиме тренировки представляет собой экземпляр tf.Variable()
         self._w   = None
 
+        # функция потерь, которая будет минимизироваться в процессе тренировки
+        self._loss = None
+
     def init(self, iterations_count):
+        assert iterations_count > 0
+
         # все компоненты представлены списками, т.к. для обучения НС итерации вычислений
         # должны быть развернуты на один батч. Соответственно каждой итерации соответствует один элемент в списке.
-        self._in  = []
-        self._a   = []
-        self._out = []
-        self._w = tf.Variable([synapse.weight for synapse in self._neural_network.data.synapses])
+        self._in      = []
+        self._a       = []
+        self._out     = []
+        self._desired = []
+        self._w = tf.Variable([synapse.weight*0.7 for synapse in self._neural_network.data.synapses], dtype=tf.float32)
+
+        self._ppp     = []
+
         for i in range(iterations_count):
             self._add_iteration()
+
+        self._loss = None
+        for out in self._out:
+            desired = tf.placeholder(dtype=tf.float32, shape=out.shape)
+            self._desired.append(desired)
+            dloss = tf.reduce_mean(tf.squared_difference(out, desired))
+            self._loss = dloss if self._loss is None else self._loss + dloss
+
+    def training(self, steps_count):
+        sess = tf.Session()
+
+        # todo: удалить все ненужное
+        optim = tf.train.GradientDescentOptimizer(learning_rate=0.025)  # Оптимизатор
+
+        grads_and_vars = optim.compute_gradients(self._loss)
+
+        train_step = optim.minimize(self._loss)
+
+        sess.run(tf.global_variables_initializer())
+        for batch in self._training_set_batch(steps_count):
+            feed_data = {}
+            for tf_in, tf_desired, training_set in zip(self._in, self._desired, batch):
+                feed_data[tf_in] = training_set.data_in
+                feed_data[tf_desired] = training_set.data_out
+            result = sess.run([train_step, grads_and_vars, self._loss], feed_dict=feed_data)
+            # all_data = [
+            #     self._loss,
+            #     self._w,
+            #     self._in,
+            #     self._a,
+            #     self._out,
+            #     self._desired
+            # ]
+            #
+            # all_data = sess.run(all_data, feed_dict=feed_data)
+            pass
 
     def _add_iteration(self):
         """
@@ -220,8 +287,21 @@ class Trainer(_Calculator_impl):
         self._a  .append(a1        )
         self._out.append(indicators)
 
-    def training(self):
-        sess = tf.Session()
-        sess.run(tf.global_variables_initializer())
-
-        pass
+    def _training_set_batch(self, steps_count):
+        batch = None
+        batch_len = len(self._in)
+        step = 0
+        for ts in Engine.training_data().training_set_loopped():
+            if batch is None:
+                batch_len = len(self._in)
+                batch = []
+                #batch = [[], []]
+            batch.append(ts)
+            # batch[0].append(ts.data_in)
+            # batch[1].append(ts.data_out)
+            if len(batch) >= batch_len:
+                yield batch
+                step += 1
+                if step >= steps_count:
+                    return
+                batch = None

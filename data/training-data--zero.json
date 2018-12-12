@@ -1,0 +1,13 @@
+{
+    "training_set_name": "qwerty_001",
+    "inputs": ["input_01", "input_03", "input_02"],
+    "outputs": ["qwerty"],
+    "combo_set_ratio": 0.8,
+    "combo_set": [],
+    "training_set": [
+        {"in": [0, 0, 0], "out": [0]}
+    ],
+    "testing_set": [
+        {"in": [0, 0, 0], "out": [0]}
+    ]
+}

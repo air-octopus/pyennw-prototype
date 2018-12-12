@@ -41,6 +41,45 @@ class SaveLoad:
 
         return data.id
 
+    def load_from_str(self, s):
+        """
+        загружает данные нейросети из строки (json)
+        # todo: не закончена и не протестирована
+        """
+        d = self.__data = nn.Data()
+
+        j = json.loads(s)
+
+        d._extra_data["parent_id"] = j["extra_data"]["parent_id"]
+        d._effective_deepness      = j["effective_deepness"     ]
+        d._response_time           = j["response_time"          ]
+        d._resolving_ability       = j["resolving_ability"      ]
+        d._quality                 = j["quality"                ]
+        d._adaptability            = j["adaptability"           ]
+
+        self.__data._neurons = [
+            nn.Neuron(id, [0] * axon_len, tf_type, json.loads(tf_params))
+            for id, tf_type, tf_params, axon_len
+            in j["neurons"]
+        ]
+        self.__data._map_neuron_id2ind = None
+
+        self._load_neuron_bodies(id)
+        self._load_neuron_inputs(id)
+        self._load_neuron_outputs(id)
+        self._load_synapses(id)
+
+        # todo: Нужно выполнять корректировку рецепторов/индикторов под текущие входные и выходные данные (возможно придется пересортировать)
+        # По сути это означает, что основным открытым интерфейсом становится nn.Builder. т.е. стек вызовов будет такой:
+        #       NeuralNetwork.__init__(...)
+        #       --> Builder.load(...)
+        #           --> SaveLoad.load(...)
+        #
+
+        data = self.__data
+        self.__data = None
+        return data
+
     def load(self, id):
         """
         загружает данные нейросети с идентификатором id из базы данных

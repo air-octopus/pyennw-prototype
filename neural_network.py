@@ -41,7 +41,7 @@ class NeuralNetwork:
     def data(self):
         return self._data
 
-    def __init__(self, id):
+    def __init__(self, id=0):
 
         if id == 0:
             self._data = nn.Builder().build_protozoan()

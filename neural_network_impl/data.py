@@ -1,9 +1,7 @@
 # coding=utf-8
 
 import copy
-
-# from neural_network_impl.synapse import Synapse
-# from neural_network_impl.neuron import Neuron
+import json
 
 class Data:
     """
@@ -147,13 +145,39 @@ class Data:
         Сохранить состояние нейросети
         :return: состояние нейросети (на данный момент состояние содержится в массиве аксонов)
         """
-        return [copy.deepcopy(n.axon) for n in self.data.neurons]
+        return [copy.deepcopy(n.axon) for n in self.neurons]
 
     def restore_state(self, state):
         """
         Восстановить состояние нейросети, сохраненное с помощью метода clone_state()
         :param state: состояние НС, полученное ранее с помощью метода clone_state()
         """
-        for neuron, axon in zip(self.data.neurons, state):
+        for neuron, axon in zip(self.neurons, state):
             neuron.axon = axon
+
+    def serialize_json(self):
+        return json.dumps( {
+            "effective_deepness": self._effective_deepness,
+            "response_time"     : self._response_time     ,
+            "resolving_ability" : self._resolving_ability ,
+            "quality"           : self._quality           ,
+            "adaptability"      : self._adaptability      ,
+            "extra_data"        : self._extra_data        ,
+            "neurons"           : [ {
+                "id:"                      : i + 1                      ,
+                "axon_len"                 : len(n.axon)                ,
+                "transfer_function_type"   : n.transfer_function_type   ,
+                "transfer_function_params" : n.transfer_function_params ,
+                "effective_deepness"       : n.effective_deepness
+            } for i, n in enumerate(self.neurons) ],
+            "synapses" : [ {
+                "src"    : s.src + 1,
+                "own"    : s.own + 1,
+                "weight" : s.weight
+            } for s in self.synapses ],
+            "input_neurons"  : [ i + 1 for i in self.input_neurons  ],
+            "output_neurons" : [ i + 1 for i in self.output_neurons ],
+        },
+        indent=4)
+
 

@@ -39,22 +39,36 @@ create_engine(".temp/temp.db", "data/training-data.json")
 # engine = Engine(".temp/temp.db", "data/training-data.json")
 # engine = Engine.instance()
 
-# td = Engine.training_data()
-# ts = td.training_set()
-# # for o in ts:
-# #     print([o.data_in, o.data_out])
-# print(ts.next())
-# print(ts.next())
-# print(ts.next())
-# print(ts.next())
-# print(ts.next())
-#print(ts[1])
-#print(ts[2])
-#print(ts[3])
+# def ppp():
+#     while True:
+#         yield 7
+#
+# ppp().__iter__()
 
-nn0 = NeuralNetwork(1)
+td = Engine.training_data()
+# #--- ts = td.training_set()
+# for o in td.training_set_loopped():
+#     print([o.data_in, o.data_out])
+# #--- print(ts.__next__())
+# #--- print(ts.__next__())
+# #--- print(ts.__next__())
+# #--- print(ts.__next__())
+# #--- print(ts.__next__())
+# #print(ts[1])
+# #print(ts[2])
+# #print(ts[3])
 
-calc = nn.Calculator(nn0)
+nn0 = NeuralNetwork()
+
+s = nn0.data.serialize_json()
+
+trainer = nn.Trainer(nn0)
+trainer.init(iterations_count=1)
+
+trainer.training(100)
+
+for t in trainer._training_set_batch(2):
+    print(t)
 
 # nn0.data._response_time     = 14.1234567
 # nn0.data._resolving_ability = 15.1234567
