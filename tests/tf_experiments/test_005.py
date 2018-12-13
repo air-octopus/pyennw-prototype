@@ -124,6 +124,7 @@ b1 = tf.matmul(a, weight_lay_2)
 b1 = tf.reshape(b1, shape=[tf.shape(b1)[0]])
 b2 = b1 #+ bias_lay_2
 b3 = tf.nn.relu(b2)
+#b3 = tf.nn.relu(b2) - 0.1*tf.nn.relu(-b2)
 # b3 = tf.nn.sigmoid(b2)
 b = b3
 
@@ -135,7 +136,7 @@ sess = tf.Session()
 # Создаем оптимизиатор
 loss = tf.reduce_mean(tf.squared_difference(output_value, desired_value))
 variable_summaries('loss', loss)
-optim = tf.train.GradientDescentOptimizer(learning_rate=0.25)  # Оптимизатор
+optim = tf.train.GradientDescentOptimizer(learning_rate=0.025)  # Оптимизатор
 grads_and_vars = optim.compute_gradients(loss)
 for gav in grads_and_vars:
     scope = gav[1].name.replace(":", "_")

@@ -59,11 +59,15 @@ td = Engine.training_data()
 # #print(ts[3])
 
 nn0 = NeuralNetwork()
+nnid = nn0.save()
 
-s = nn0.data.serialize_json()
+for synapse in nn0.data.synapses:
+    synapse.weight *= 0.7
+
+#s = nn0.data.serialize_json()
 
 trainer = nn.Trainer(nn0)
-trainer.init(iterations_count=1)
+trainer.init(iterations_count=3)
 
 trainer.training(100)
 

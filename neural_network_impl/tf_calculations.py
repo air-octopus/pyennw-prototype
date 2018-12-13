@@ -70,10 +70,6 @@ class _Calculator_impl:
         # Исходная нейросеть
         self._neural_network = neural_network
 
-        self._ppp = []
-
-        # Внутренние данные класса Calculator зависятот того
-
         # Массивы тензоров векторизованного представления нейросети.
         #
         # В режиме тренировки нейросети входные данные бьются на батчи по несколько записей.
@@ -132,11 +128,8 @@ class _Calculator_impl:
         self._a_zeros_init = tf.constant([0] * self._a1_len)
 
     def clear(self):
-#        nn = self._neural_network
-
         # все компоненты представлены списками, т.к. для обучения НС итерации вычислений
         # должны быть развернуты на один батч. Соответственно каждой итерации соответствует один элемент в списке.
-
         self._in  = []
         self._a   = []
         self._out = []
@@ -159,8 +152,6 @@ class _Calculator_impl:
         # входные данные
         receptors = tf.placeholder(dtype=tf.float32, shape=[self._in_len], name="input_value_%d" % it_num)
 
-        self._ppp.append((receptors, "receptors"))
-
         # подготавливаем данные для свертки с массивом весов
         stitch_ind = []
         stitch_src = []
@@ -169,7 +160,6 @@ class _Calculator_impl:
             p1 = tf.gather(receptors, self._indices_gather_receptors)
             stitch_ind.append(self._indices_stitch_receptors)
             stitch_src.append(p1)
-            self._ppp.append((p1, "p1"))
         else:
             assert len(self._indices_gather_receptors) + len(self._indices_stitch_receptors) == 0, "Indices can be empty only together"
 
@@ -177,24 +167,20 @@ class _Calculator_impl:
             p2 = tf.gather(a2, self._indices_gather_workers)
             stitch_ind.append(self._indices_stitch_workers)
             stitch_src.append(p2)
-            self._ppp.append((p2, "p2"))
         else:
             assert len(self._indices_gather_workers) + len(self._indices_stitch_workers) == 0, "Indices can be empty only together"
 
         p3 = tf.dynamic_stitch(stitch_ind, stitch_src)
-        self._ppp.append((p3, "p3"))
 
         p4 = p3 * self._w
-        self._ppp.append((p4, "p4"))
 
         p5 = tf.gather(p4, self._indices_gather_synapses_for_sum)
-        self._ppp.append((p5, "p5"))
 
         a1 = tf.segment_sum(p5, self._indices_segment_sum_synapses)
-        self._ppp.append((a1, "a1"))
+
+        # todo: добавить функцию активации
 
         indicators = tf.gather(a1, self._indices_gather_indicators)
-        self._ppp.append((indicators, "indicators"))
 
         return (receptors, a1, indicators)
 
@@ -231,9 +217,7 @@ class Trainer(_Calculator_impl):
         self._a       = []
         self._out     = []
         self._desired = []
-        self._w = tf.Variable([synapse.weight*0.7 for synapse in self._neural_network.data.synapses], dtype=tf.float32)
-
-        self._ppp     = []
+        self._w = tf.Variable([synapse.weight for synapse in self._neural_network.data.synapses], dtype=tf.float32)
 
         for i in range(iterations_count):
             self._add_iteration()
@@ -249,6 +233,8 @@ class Trainer(_Calculator_impl):
         sess = tf.Session()
 
         # todo: удалить все ненужное
+
+        # todo: learning_rate должен быть или в настройках или вычисляться адаптивно
         optim = tf.train.GradientDescentOptimizer(learning_rate=0.025)  # Оптимизатор
 
         grads_and_vars = optim.compute_gradients(self._loss)
