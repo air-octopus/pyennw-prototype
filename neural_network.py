@@ -6,6 +6,7 @@
 
 
 import neural_network_impl as nn
+import collections
 
 
 class NeuralNetwork:
@@ -68,23 +69,6 @@ class NeuralNetwork:
     def do_iteration(self, ):
         # todo: реализовать через tensorflow
         pass
-        # # shortcats
-        # neurons     = self.data.neurons
-        # synapses    = self.data.synapses
-        #
-        # # прокручиваем аксоны
-        # for n in neurons:
-        #     if (len(n.axon) > 1): # исключаем рецепторы (у которых длина аксона == 1)
-        #         n.axon = [0] + n.axon[0:-1]
-        #
-        # # выполняем действия над синапсами
-        # for synapse in synapses:
-        #     neurons[synapse.own].axon[0] += neurons[synapse.src].axon[-1] * neurons[synapse.own].weight
-        #
-        # # применяем передаточную функцию
-        # for n in neurons:
-        #     if (len(n.axon) > 1): # исключаем рецепторы (у которых длина аксона == 1)
-        #         n.axon[0] = n.transfer_function.func(n.axon[0], n.transfer_function_params)
 
     def reset(self):
         """
@@ -92,28 +76,30 @@ class NeuralNetwork:
         """
         self.data.reset()
 
-    # def clone(self):
-    #     """
-    #     Создать копию данных нейросети
-    #     """
-    #     return self.data.clone()
-    #
-    # def clone_clean(self):
-    #     """
-    #     Создать нейросеть с такой же структурой, но с начальным состоянием
-    #     """
-    #     return self.data.clone_clean()
-    #
-    # def clone_state(self):
-    #     """
-    #     Сохранить состояние нейросети
-    #     :return: состояние нейросети (на данный момент состояние содержится в массиве аксонов)
-    #     """
-    #     return self.data.clone_state()
-    #
-    # def restore_state(self, state):
-    #     """
-    #     Восстановить состояние нейросети, сохраненное с помощью метода clone_state()
-    #     :param state: состояние НС, полученное ранее с помощью метода clone_state()
-    #     """
-    #     self.data.restore_state(state)
+    def print_gv(self):
+        d = self.data
+        neuron_synapses = collections.defaultdict(list)
+        for i, s in enumerate(d.synapses):
+            neuron_synapses[s.own].append(i)
+
+        neurons_str = []
+        for ni, n in enumerate(d.neurons):
+            neuron_synapses_str = "{" + "|".join(["<s%d> %.5f" % (si, d.synapses[si].weight) for si in neuron_synapses[ni]]) + "}|" if ni in neuron_synapses else ""
+            neurons_str.append('    n%d [label="{%s<r>}"];' % (ni, neuron_synapses_str))
+
+
+        synapses_str = []
+        for si, s in enumerate(d.synapses):
+            synapses_str.append('    n%d:r -> n%d:s%d' % (s.src, s.own, si))
+
+        result = '''digraph structs {
+    node [shape=record];
+    rankdir=LR;
+        
+%s
+
+%s
+}
+''' % ('\n'.join(neurons_str), '\n'.join(synapses_str))
+
+        return result

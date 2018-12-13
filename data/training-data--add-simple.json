@@ -1,0 +1,18 @@
+{
+    "training_set_name": "add_002",
+    "inputs": ["input_01", "input_02"],
+    "outputs": ["sum"],
+    "combo_set_ratio": 0.8,
+    "combo_set": [],
+    "training_set": [
+        {"in": [1, 2], "out": [3]},
+        {"in": [3, 5], "out": [8]},
+        {"in": [4, 1], "out": [5]},
+        {"in": [0, 1], "out": [1]}
+    ],
+    "testing_set": [
+        {"in": [7, 8], "out": [15]},
+        {"in": [3, 1], "out": [ 4]},
+        {"in": [5, 3], "out": [ 8]}
+    ]
+}

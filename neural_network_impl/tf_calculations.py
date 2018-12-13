@@ -241,6 +241,7 @@ class Trainer(_Calculator_impl):
 
         train_step = optim.minimize(self._loss)
 
+        loss_val = -1
         sess.run(tf.global_variables_initializer())
         for batch in self._training_set_batch(steps_count):
             feed_data = {}
