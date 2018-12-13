@@ -32,8 +32,8 @@ from neural_network import NeuralNetwork
 
 
 
-# if (os.access(".temp/temp.db", os.F_OK)):
-#     os.remove(".temp/temp.db")
+if (os.access(".temp/temp.db", os.F_OK)):
+    os.remove(".temp/temp.db")
 
 create_engine(".temp/temp.db", "data/training-data.json")
 # engine = Engine(".temp/temp.db", "data/training-data.json")
@@ -59,7 +59,6 @@ td = Engine.training_data()
 # #print(ts[3])
 
 nn0 = NeuralNetwork()
-nnid = nn0.save()
 
 for synapse in nn0.data.synapses:
     synapse.weight *= 0.7
@@ -69,10 +68,12 @@ for synapse in nn0.data.synapses:
 trainer = nn.Trainer(nn0)
 trainer.init(iterations_count=3)
 
-trainer.training(100)
+trainer.training(10)
 
-for t in trainer._training_set_batch(2):
-    print(t)
+# for t in trainer._training_set_batch(2):
+#     print(t)
+
+nnid = nn0.save()
 
 # nn0.data._response_time     = 14.1234567
 # nn0.data._resolving_ability = 15.1234567

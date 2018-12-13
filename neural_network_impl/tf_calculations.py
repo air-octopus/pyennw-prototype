@@ -248,6 +248,7 @@ class Trainer(_Calculator_impl):
                 feed_data[tf_in] = training_set.data_in
                 feed_data[tf_desired] = training_set.data_out
             result = sess.run([train_step, grads_and_vars, self._loss], feed_dict=feed_data)
+            loss_val = result[2]
             # all_data = [
             #     self._loss,
             #     self._w,
@@ -259,6 +260,15 @@ class Trainer(_Calculator_impl):
             #
             # all_data = sess.run(all_data, feed_dict=feed_data)
             pass
+
+        weights = sess.run(self._w)
+        for synapse, w in zip(self._neural_network.data.synapses, weights):
+            synapse.weight = w
+
+        # todo: вынести отдельно весь код оценки нейросети
+        # сейчас для простоты используем вычисленное значение функции потерь,
+        # однако в дальнейшем надо будет оценивать и время реакции и разрешающую способность и проч
+        self._neural_network.data._quality = loss_val
 
     def _add_iteration(self):
         """
