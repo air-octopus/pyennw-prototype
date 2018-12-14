@@ -56,12 +56,6 @@ class Data:
     @property
     def adaptability        (self): return self._adaptability
 
-    @property
-    def map_neuron_id2ind   (self):
-        if self._map_neuron_id2ind  is None:
-            self.rebuild_indices()
-        return self._map_neuron_id2ind
-
     def __init__(self):
 
         # по-умолчанию предполагаем, что текущая нейросеть пока что существует только в памяти, поэтому имеет невалидный идентификатор
@@ -102,22 +96,6 @@ class Data:
         self._quality                   = -1
         # приспособляемость НС
         self._adaptability              = -1
-
-        #############################
-        # индексы
-
-        # Отображение id нейрона в его индекс
-        self._map_neuron_id2ind = None
-
-        # Отображение sid входа в индекс нейрона-рецептора
-        # self._map_input_sid2ind = dict()
-        # Отображение sid выхода в индекс нейрона-индикатора
-        # self._map_output_sid2ind = dict()
-
-    def rebuild_indices(self):
-        self._map_neuron_id2ind = dict()
-        for ind, neuron in enumerate(self._neurons):
-            self._map_neuron_id2ind[neuron.id] = ind
 
     def reset(self):
         """

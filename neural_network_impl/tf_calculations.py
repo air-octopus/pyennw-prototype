@@ -125,7 +125,7 @@ class _Calculator_impl:
         self._w_len   = len(d.synapses      )
         self._out_len = len(d.output_neurons)
 
-        self._a_zeros_init = tf.constant([0] * self._a1_len)
+        self._a_zeros_init = tf.constant([0] * self._a1_len, dtype=tf.float32)
 
     def clear(self):
         # все компоненты представлены списками, т.к. для обучения НС итерации вычислений
@@ -223,9 +223,13 @@ class Trainer(_Calculator_impl):
             self._add_iteration()
 
         self._loss = None
+        skip = (int)(self._neural_network._data._response_time)
         for out in self._out:
             desired = tf.placeholder(dtype=tf.float32, shape=out.shape)
             self._desired.append(desired)
+            if skip > 0:
+                skip -= 1
+                continue
             dloss = tf.reduce_mean(tf.squared_difference(out, desired))
             self._loss = dloss if self._loss is None else self._loss + dloss
 
@@ -235,7 +239,8 @@ class Trainer(_Calculator_impl):
         # todo: удалить все ненужное
 
         # todo: learning_rate должен быть или в настройках или вычисляться адаптивно
-        optim = tf.train.GradientDescentOptimizer(learning_rate=0.025)  # Оптимизатор
+        #optim = tf.train.GradientDescentOptimizer(learning_rate=0.0025)  # Оптимизатор
+        optim = tf.train.AdamOptimizer(learning_rate=0.25)  # Оптимизатор
 
         grads_and_vars = optim.compute_gradients(self._loss)
 
@@ -248,7 +253,7 @@ class Trainer(_Calculator_impl):
             for tf_in, tf_desired, training_set in zip(self._in, self._desired, batch):
                 feed_data[tf_in] = training_set.data_in
                 feed_data[tf_desired] = training_set.data_out
-            result = sess.run([train_step, grads_and_vars, self._loss], feed_dict=feed_data)
+            result = sess.run([train_step, grads_and_vars, self._loss, self._out], feed_dict=feed_data)
             loss_val = result[2]
             # all_data = [
             #     self._loss,
