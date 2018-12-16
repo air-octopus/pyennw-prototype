@@ -95,7 +95,6 @@ class Builder:
         # рассматриваем связи все-со-всеми
         for src in (self._temp_data._map_input_sid2ind[src_sid] for src_sid in inputs_to_add):
             for own in (self._temp_data._map_output_sid2ind[own_sid] for own_sid in outputs_to_add):
-                # добавляем синаптическую связь
                 self._data._synapses.append(nn.Synapse(src, own, 1)) # todo: вынести значение веса по-умолчанию в настройки
 
         # todo: добавить реализацию для удаления рецепторов и/или индикаторов

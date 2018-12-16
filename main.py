@@ -56,7 +56,17 @@ td = Engine.training_data()
 # #print(ts[2])
 # #print(ts[3])
 
+# import hashlib
+# hashlib.md5('a'.encode()).hexdigest()
+# '0cc175b9c0f1b6a831c399e269772661'
+# hashlib.md5('a'.encode()).hexdigest()
+# '0cc175b9c0f1b6a831c399e269772661'
+# hashlib.md5('b'.encode()).hexdigest()
+# '92eb5ffee6ae2fec3ad71c777531578f'
+
 nn0 = NeuralNetwork(1)
+
+nn.CalculatableParams.fill_deepness(nn0.data)
 
 for synapse in nn0.data.synapses:
     synapse.weight *= 0.7

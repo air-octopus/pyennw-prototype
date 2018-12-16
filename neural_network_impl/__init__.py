@@ -1,11 +1,14 @@
 # coding=utf-8
 
-from neural_network_impl.data               import *
-from neural_network_impl.data_builder       import *
-from neural_network_impl.data_saveload      import *
-from neural_network_impl.neuron             import *
-from neural_network_impl.synapse            import *
-from neural_network_impl.tf_calculations    import *
+from neural_network_impl.data                   import *
+from neural_network_impl.data_builder           import *
+from neural_network_impl.data_saveload          import *
+from neural_network_impl.hasher                 import *
+from neural_network_impl.neuron                 import *
+from neural_network_impl.synapse                import *
+from neural_network_impl.tf_calculations        import *
+
+from neural_network_impl.calculatable_params    import *
 
 # import neural_network_impl.data            as data
 # import neural_network_impl.network_builder as network_builder
