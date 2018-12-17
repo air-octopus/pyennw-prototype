@@ -37,12 +37,13 @@ class Builder:
         и связей между ними по типу все-со-всеми
         """
         self._temp_data = Builder.TempData()
-        self._data = nn.Data()
+        self._data = d = nn.Data()
         self._adapt_for_inputs_and_outputs()
         self._calc_effective_deepness()
-        data = self._data
+        nn.CalculatableParams.fill_deepness(d)
+        nn.CalculatableParams.fill_hash(d)
         self.__clear()
-        return data
+        return d
 
     def __add_receptor(self, input_data_name):
         new_neuron_ind = len(self.data.neurons)

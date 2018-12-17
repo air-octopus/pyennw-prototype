@@ -18,6 +18,10 @@ class Engine:
     @classmethod
     def training_data(cls): return cls._instance._training_data
 
+    @classmethod
+    def destroy(cls): cls._instance = None
+
+
     # @property
     # def db(self): return self._db
     # @property

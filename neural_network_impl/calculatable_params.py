@@ -6,9 +6,6 @@ import collections
 
 class CalculatableParams:
 
-    # class NeuronPresentation:
-    #     pass
-
     @classmethod
     def fill_deepness(cls, d : nn.Data):
         neuron_ind_to_successors_inds = collections.defaultdict(list)

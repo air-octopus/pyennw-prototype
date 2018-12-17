@@ -58,7 +58,7 @@ Calculator работает в двух режимах:
 """
 
 import tensorflow as tf
-import neural_network
+# import neural_network
 import neural_network_impl as nn
 from engine import Engine
 
@@ -66,9 +66,10 @@ from collections import defaultdict
 
 class _Calculator_impl:
 
-    def __init__(self, neural_network : neural_network.NeuralNetwork):
+    def __init__(self, d : nn.Data):
+
         # Исходная нейросеть
-        self._neural_network = neural_network
+        self._data = d
 
         # Массивы тензоров векторизованного представления нейросети.
         #
@@ -89,8 +90,6 @@ class _Calculator_impl:
         # В режиме тренировки представляет собой экземпляр tf.Variable()
         # В режиме вычислений -- tf.constant
         self._w   = None
-
-        d = neural_network.data
 
         # Разделим все нейроны на рецепторы и рабочие нейроны.
         # Компонент 'in' соответствует рецепторам, а компоненты a1 и a2 -- рабочим нейронам
@@ -185,8 +184,8 @@ class _Calculator_impl:
         return (receptors, a1, indicators)
 
 class Trainer(_Calculator_impl):
-    def __init__(self, neural_network : neural_network.NeuralNetwork):
-        super().__init__(neural_network)
+    def __init__(self, d : nn.Data):
+        super().__init__(d)
 
         # Массивы тензоров векторизованного представления нейросети.
         #
@@ -217,13 +216,13 @@ class Trainer(_Calculator_impl):
         self._a       = []
         self._out     = []
         self._desired = []
-        self._w = tf.Variable([synapse.weight for synapse in self._neural_network.data.synapses], dtype=tf.float32)
+        self._w = tf.Variable([synapse.weight for synapse in self._data.synapses], dtype=tf.float32)
 
         for i in range(iterations_count):
             self._add_iteration()
 
         self._loss = None
-        skip = (int)(self._neural_network._data._response_time)
+        skip = (int)(self._data._response_time)
         for out in self._out:
             desired = tf.placeholder(dtype=tf.float32, shape=out.shape)
             self._desired.append(desired)
@@ -268,13 +267,13 @@ class Trainer(_Calculator_impl):
             pass
 
         weights = sess.run(self._w)
-        for synapse, w in zip(self._neural_network.data.synapses, weights):
+        for synapse, w in zip(self._data.synapses, weights):
             synapse.weight = w
 
         # todo: вынести отдельно весь код оценки нейросети
         # сейчас для простоты используем вычисленное значение функции потерь,
         # однако в дальнейшем надо будет оценивать и время реакции и разрешающую способность и проч
-        self._neural_network.data._quality = loss_val
+        self._data._quality = loss_val
 
     def _add_iteration(self):
         """

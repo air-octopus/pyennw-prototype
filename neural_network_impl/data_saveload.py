@@ -12,7 +12,7 @@ class SaveLoad:
         if hasattr(self, "_map_neuron_id2ind"): self.__delattr__("_map_neuron_id2ind")
         if hasattr(self, "__data"            ): self.__delattr__("__data"            )
 
-    def save(self, data):
+    def save(self, data : nn.Data):
         db = Engine.db()
 
         # сохраняем id родительской нейросети и получаем (создаем) id текущей

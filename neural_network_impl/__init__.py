@@ -1,13 +1,19 @@
 # coding=utf-8
 
-# основные классы
+# Note:
+# Последовательность перечисления модулей отражает их зависимости.
+# Т.е. модули расположенные ниже могут зависеть от модулей, расположенных выше,
+# но не наоборот
+
 from neural_network_impl.data                   import *
-from neural_network_impl.data_builder           import *
-from neural_network_impl.data_saveload          import *
+from neural_network_impl.calculatable_params    import *
+
 from neural_network_impl.neuron                 import *
 from neural_network_impl.synapse                import *
 
-# классы, которые используют перечисленные выше
-from neural_network_impl.calculatable_params    import *
+from neural_network_impl.data_builder           import *
+from neural_network_impl.data_saveload          import *
+
 from neural_network_impl.hasher                 import *
 from neural_network_impl.tf_calculations        import *
+from neural_network_impl.mutator                import *
