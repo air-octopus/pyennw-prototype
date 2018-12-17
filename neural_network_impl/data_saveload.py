@@ -128,6 +128,7 @@ class SaveLoad:
 
     def _load_neuron_inputs(self, nnid):
         inputs = Engine.db().load_nn_inputs(nnid)
+        # todo: перенести сортировку в Builder._adapt_for_inputs_and_outputs() (...или просто разобраться где она будет смотреться более логично)
         inputs_inds = {sid: ind for ind, sid in enumerate(Engine.training_data().inputs)}
         inputs.sort(key = lambda x: inputs_inds[x[1]])
         self.__data._input_neurons            = [ self._map_neuron_id2ind[id] for id, input_sid in inputs ]

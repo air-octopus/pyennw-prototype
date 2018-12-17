@@ -48,7 +48,7 @@ class Builder:
         new_neuron_ind = len(self.data.neurons)
         new_neuron_tf = Type.relu
         new_neuron_tf_params = ()
-        new_neuron = nn.Neuron(None, [0], new_neuron_tf, new_neuron_tf_params)
+        new_neuron = nn.Neuron([0], new_neuron_tf, new_neuron_tf_params)
 
         self._temp_data._map_input_sid2ind [input_data_name] = new_neuron_ind
         self.data.neurons.append(new_neuron)
@@ -57,12 +57,11 @@ class Builder:
         new_neuron_ind = len(self.data.neurons)
         new_neuron_tf = Type.linear
         new_neuron_tf_params = ()
-        new_neuron = nn.Neuron(None, [0, 0], new_neuron_tf, new_neuron_tf_params)
+        new_neuron = nn.Neuron([0, 0], new_neuron_tf, new_neuron_tf_params)
         # В настоящее время при создании нейрона-индикатора он присоединяется напрямую к рецептору
         # (у которого глубина по-определению равна нулю),
         # поэтому в данном случае глубина индикатора будет 1
-        # А вообще... надо todo: добавить функцию перевычисления эффективной глубины нейронов и нейросети
-        new_neuron.effective_deepness = 1
+        new_neuron.deepness = 1
 
         self._temp_data._map_output_sid2ind [output_data_name] = new_neuron_ind
         self.data.neurons.append(new_neuron)
@@ -99,7 +98,8 @@ class Builder:
 
         # todo: добавить реализацию для удаления рецепторов и/или индикаторов
 
-        # todo: добавить сортировку рецепторооов и индикаторов в соответствии с порядком Engine.training_data().in/out
+        # todo: добавить сортировку рецепторов и индикаторов в соответствии с порядком Engine.training_data().in/out
+        # Note: сейчас сортировка выполняется в SaveLoad._load_neuron_inputs()
 
         self.data._input_neurons  = self._temp_data.input_neurons
         self.data._output_neurons = self._temp_data.output_neurons
@@ -108,9 +108,9 @@ class Builder:
 
     def _calc_effective_deepness(self):
         for n in self.data.neurons:
-            n.effective_deepness = -1
+            n.deepness = -1
         for i in self.data.input_neurons:
-            self._data._neurons[i].effective_deepness = 0
+            self._data._neurons[i].deepness = 0
 
         stop = False
 
@@ -118,11 +118,11 @@ class Builder:
             stop = True
             replaces_count = 0
             for synapse in self.data.synapses:
-                src_effective_deepness = self.data.neurons[synapse.src].effective_deepness
-                own_effective_deepness = self.data.neurons[synapse.own].effective_deepness
-                if own_effective_deepness < 0:
-                    if src_effective_deepness >= 0:
-                        self.data.neurons[synapse.own].effective_deepness = src_effective_deepness + 1
+                src_deepness = self.data.neurons[synapse.src].deepness
+                own_deepness = self.data.neurons[synapse.own].deepness
+                if own_deepness < 0:
+                    if src_deepness >= 0:
+                        self.data.neurons[synapse.own].deepness = src_deepness + 1
                         replaces_count += 1
                     else:
                         stop = False
@@ -133,6 +133,6 @@ class Builder:
 
         self.data._effective_deepness = -1
         for n in self._data._neurons:
-            if n.effective_deepness > self.data.effective_deepness:
-                self.data._effective_deepness = n.effective_deepness
+            if n.deepness > self.data._effective_deepness:
+                self.data._effective_deepness = n.deepness
 

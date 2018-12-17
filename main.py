@@ -68,6 +68,9 @@ nn0 = NeuralNetwork(1)
 
 nn.CalculatableParams.fill_deepness(nn0.data)
 
+hsh = nn.Hasher.caclulate_hash(nn0.data)
+
+
 for synapse in nn0.data.synapses:
     synapse.weight *= 0.7
 

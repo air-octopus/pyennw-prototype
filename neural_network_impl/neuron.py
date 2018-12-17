@@ -18,5 +18,5 @@ class Neuron:
         self.axon = axon
         self.transfer_function_type = transfer_function_type
         self.transfer_function_params = transfer_function_params
-        self.effective_deepness = 0
+        self.deepness = None
 

@@ -55,6 +55,8 @@ class Data:
     def quality             (self): return self._quality
     @property
     def adaptability        (self): return self._adaptability
+    @property
+    def hash                (self): return self._hash
 
     def __init__(self):
 
@@ -96,6 +98,8 @@ class Data:
         self._quality                   = -1
         # приспособляемость НС
         self._adaptability              = -1
+
+        self._hash = None
 
     def reset(self):
         """
@@ -146,7 +150,7 @@ class Data:
                 "axon_len"                 : len(n.axon)                ,
                 "transfer_function_type"   : n.transfer_function_type   ,
                 "transfer_function_params" : n.transfer_function_params ,
-                "effective_deepness"       : n.effective_deepness
+                "deepness"                 : n.deepness
             } for i, n in enumerate(self.neurons) ],
             "synapses" : [ {
                 "src"    : s.src + 1,

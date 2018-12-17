@@ -21,42 +21,42 @@
             "axon_len": 1,
             "transfer_function_type": 2,
             "transfer_function_params": [],
-            "effective_deepness": 0
+            "deepness": 0
         },
         {
             "id": 2,
             "axon_len": 1,
             "transfer_function_type": 2,
             "transfer_function_params": [],
-            "effective_deepness": 0
+            "deepness": 0
         },
         {
             "id": 3,
             "axon_len": 1,
             "transfer_function_type": 2,
             "transfer_function_params": [],
-            "effective_deepness": 0
+            "deepness": 0
         },
         {
             "id": 4,
             "axon_len": 2,
             "transfer_function_type": 1,
             "transfer_function_params": [],
-            "effective_deepness": 1
+            "deepness": 1
         },
         {
             "id": 5,
             "axon_len": 2,
             "transfer_function_type": 1,
             "transfer_function_params": [],
-            "effective_deepness": 1
+            "deepness": 1
         },
         {
             "id": 6,
             "axon_len": 2,
             "transfer_function_type": 1,
             "transfer_function_params": [],
-            "effective_deepness": 1
+            "deepness": 1
         }
     ],
     "synapses": [
