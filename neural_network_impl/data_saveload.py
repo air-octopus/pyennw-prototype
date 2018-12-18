@@ -18,11 +18,12 @@ class SaveLoad:
         # сохраняем id родительской нейросети и получаем (создаем) id текущей
         # todo: реализовать вычисление времени отклика, качества и приспособленности НС
         data._id = db.save_species(data.extra_data["parent"],
-                                    data.effective_deepness,
-                                    data.response_time,
-                                    data.resolving_ability,
-                                    data.quality,
-                                    data.adaptability)
+                                   data.hash,
+                                   data.effective_deepness,
+                                   data.response_time,
+                                   data.resolving_ability,
+                                   data.quality,
+                                   data.adaptability)
 
         neurons = data.neurons
         # сохраняем параметры нейронов и получаем их идентификаторы

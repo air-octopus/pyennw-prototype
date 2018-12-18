@@ -53,6 +53,7 @@ class NeuralNetworkDB:
             CREATE TABLE IF NOT EXISTS nn_species_all (
                 id                 INTEGER PRIMARY KEY,
                 parent_id          INTEGER,
+                hash               TEXT,
                 is_alive           INTEGER,
                 effective_deepness INTEGER,
                 response_time      REAL,
@@ -158,6 +159,7 @@ class NeuralNetworkDB:
         q = """
             SELECT
                   parent_id
+                , hash
                 , effective_deepness
                 , response_time
                 , resolving_ability
@@ -238,12 +240,13 @@ class NeuralNetworkDB:
         """ % species_id
         return list(self._cursor.execute(q))
 
-    def save_species(self, parent_id,
-                     effective_deepness,
-                     response_time,
-                     resolving_ability,
-                     quality,
-                     adaptability):
+    def save_species(self, parent_id
+                     , hash
+                     , effective_deepness
+                     , response_time
+                     , resolving_ability
+                     , quality
+                     , adaptability):
         """
         Сохранение новой нейросети и таким образом получение для нее собственного идентификатора
         :param parent_id: идентификатор родительской нейросети
@@ -258,6 +261,7 @@ class NeuralNetworkDB:
         q = """
             INSERT INTO nn_species_all (
                   parent_id
+                , hash
                 , is_alive
                 , effective_deepness
                 , response_time
@@ -265,10 +269,11 @@ class NeuralNetworkDB:
                 , quality
                 , adaptability
             ) VALUES (
-                %d, 1, %d, %.7f, %.7f, %.7f, %.7f
+                %d, "%s", 1, %d, %.7f, %.7f, %.7f, %.7f
             )
         """ % (
             parent_id or 0
+            , hash
             , effective_deepness
             , response_time
             , resolving_ability

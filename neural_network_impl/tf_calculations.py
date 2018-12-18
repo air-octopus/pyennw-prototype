@@ -58,7 +58,6 @@ Calculator работает в двух режимах:
 """
 
 import tensorflow as tf
-# import neural_network
 import neural_network_impl as nn
 from engine import Engine
 

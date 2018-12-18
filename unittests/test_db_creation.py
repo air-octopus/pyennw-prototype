@@ -21,6 +21,8 @@ class Test_SimpleNetwork(unittest.TestCase):
 
     def test__neural_network_creation(self):
         nn0 = NeuralNetwork()
+        nn0_id = nn0.save()
+
         self.assertEqual(len(nn0.data.neurons), 4)
         self.assertEqual(nn0.data.neurons[0].deepness, 0)
         self.assertEqual(nn0.data.neurons[1].deepness, 0)
