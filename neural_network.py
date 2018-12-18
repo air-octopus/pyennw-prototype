@@ -57,14 +57,14 @@ class NeuralNetwork:
         """
         Загрузка входных данных в нейросеть.
         """
-        for neuron_ind, val in zip(self.data.input_neurons, inputs):
+        for neuron_ind, val in zip(self.data.input_neurons_inds, inputs):
             self.data.neurons[neuron_ind].axon[0] = val
 
     def get_outputs(self):
         """
         Выгрузка выходных данных
         """
-        return list(self.data.neurons[output_ind].axon[-1] for output_ind in self.data.output_neurons)
+        return list(self.data.neurons[output_ind].axon[-1] for output_ind in self.data.output_neurons_inds)
 
     def do_iteration(self, ):
         # todo: реализовать через tensorflow

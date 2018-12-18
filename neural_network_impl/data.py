@@ -36,9 +36,13 @@ class Data:
     @property
     def id                  (self): return self._id
     @property
-    def input_neurons       (self): return self._input_neurons
+    def input_neurons       (self): return [ self._neurons[i] for i in self._input_neurons_inds  ]
     @property
-    def output_neurons      (self): return self._output_neurons
+    def output_neurons      (self): return [ self._neurons[i] for i in self._output_neurons_inds ]
+    @property
+    def input_neurons_inds  (self): return self._input_neurons_inds
+    @property
+    def output_neurons_inds (self): return self._output_neurons_inds
     @property
     def synapses            (self): return self._synapses
     @property
@@ -68,9 +72,9 @@ class Data:
         # основные данные нейронной сети, определяющие ее конфигурацию и свойства.
 
         # массив индексов нейронов-рецепторов
-        self._input_neurons             = []
+        self._input_neurons_inds        = []
         # массив индексов нейронов-индикаторов
-        self._output_neurons            = []
+        self._output_neurons_inds       = []
         # массив синапсов (объектов класса Synapse)
         self._synapses                  = []
         # массив всех нейронов (объектов класса Neuron)
@@ -157,8 +161,8 @@ class Data:
                 "own"    : s.own + 1,
                 "weight" : s.weight
             } for s in self.synapses ],
-            "input_neurons"  : [ i + 1 for i in self.input_neurons  ],
-            "output_neurons" : [ i + 1 for i in self.output_neurons ],
+            "input_neurons"  : [i + 1 for i in self.input_neurons_inds],
+            "output_neurons" : [i + 1 for i in self.output_neurons_inds],
         },
         indent=4)
 

@@ -68,11 +68,11 @@ class Hasher:
             n.sid = ""
 
         input_sids = d.extra_data["input_sids"]
-        for input_ind, neuron_ind in enumerate(d.input_neurons):
+        for input_ind, neuron_ind in enumerate(d.input_neurons_inds):
             neurons[neuron_ind].sid = input_sids[input_ind]
 
         output_sids = d.extra_data["output_sids"]
-        for output_ind, neuron_ind in enumerate(d.output_neurons):
+        for output_ind, neuron_ind in enumerate(d.output_neurons_inds):
             neurons[neuron_ind].sid = output_sids[output_ind]
 
         neuron_ind_to_ancestors_inds = collections.defaultdict(list)
@@ -104,18 +104,6 @@ class Hasher:
                 neurons[neuron_ind].cid = (deepness, deepness_group_index)
 
         neuron_ind_to_cid = {n.origin_ind: n.cid for n in neurons}
-
-        """
-        для нейронов:
-            * тип передаточной функции
-            * параметры передаточной функции
-            * длина аксона
-            * глубина
-        для синапсов:
-            * cid нейрона-источника
-            * cid нейрона-приемника
-            * вес
-        """
 
         neurons_info = [
             (

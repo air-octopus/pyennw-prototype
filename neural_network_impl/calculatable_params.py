@@ -7,26 +7,33 @@ import collections
 class CalculatableParams:
 
     @classmethod
+    def fill_all(cls, d : nn.Data):
+        cls.fill_deepness(d)
+        cls.fill_hash(d)
+
+    @classmethod
     def fill_deepness(cls, d : nn.Data):
-        neuron_ind_to_successors_inds = collections.defaultdict(list)
+
+        neuron_to_successors = collections.defaultdict(list)
         for s in d.synapses:
-            neuron_ind_to_successors_inds[s.src].append(s.own)
+            neuron_to_successors[d.neurons[s.src]].append(d.neurons[s.own])
 
-        for i in d.input_neurons:
-            d.neurons[i].deepness = 0
+        input_neurons = d.input_neurons
+        for n in input_neurons:
+            n.deepness = 0
 
-        neurons_processed = set(d.input_neurons)
-        processing_queue = d.input_neurons.copy()
+        neurons_processed = set(input_neurons)
+        processing_queue = input_neurons
         max_deepness = 0
         while len(processing_queue) > 0:
-            i = processing_queue.pop(0)
-            deepness = d.neurons[i].deepness
-            for i_next in neuron_ind_to_successors_inds[i]:
-                if i_next not in neurons_processed:
-                    d.neurons[i_next].deepness = deepness + 1
+            n = processing_queue.pop(0)
+            deepness = n.deepness
+            for succ in neuron_to_successors[n]:
+                if succ not in neurons_processed:
+                    succ.deepness = deepness + 1
                     if max_deepness <= deepness: max_deepness = deepness + 1
-                    processing_queue.append(i_next)
-                    neurons_processed.add(i_next)
+                    processing_queue.append(succ)
+                    neurons_processed.add(succ)
         d._effective_deepness = max_deepness
 
     @classmethod

@@ -12,24 +12,6 @@ import neural_network_impl as nn
 
 from neural_network import NeuralNetwork
 
-#f = tf.relu
-
-# print("f(-5)", f(-5, ()))
-# print("f(-1)", f(-1, ()))
-# print("f( 0)", f( 0, ()))
-# print("f( 1)", f( 1, ()))
-# print("f(17)", f(17, ()))
-
-
-#import neural_network_impl as nn
-
-# from neural_network_impl.data import Data
-# from neural_network_impl.network_builder import Builder
-# from neural_network import NeuralNetwork
-
-#d = Data()
-# nn = NeuralNetwork(0)
-
 # if (os.access(".temp/temp.db", os.F_OK)):
 #     os.remove(".temp/temp.db")
 
@@ -37,39 +19,26 @@ create_engine(".temp/temp.db", "data/training-data.json")
 # engine = Engine(".temp/temp.db", "data/training-data.json")
 # engine = Engine.instance()
 
-# def ppp():
-#     while True:
-#         yield 7
-#
-# ppp().__iter__()
-
 td = Engine.training_data()
-# #--- ts = td.training_set()
-# for o in td.training_set_loopped():
-#     print([o.data_in, o.data_out])
-# #--- print(ts.__next__())
-# #--- print(ts.__next__())
-# #--- print(ts.__next__())
-# #--- print(ts.__next__())
-# #--- print(ts.__next__())
-# #print(ts[1])
-# #print(ts[2])
-# #print(ts[3])
 
-# import hashlib
-# hashlib.md5('a'.encode()).hexdigest()
-# '0cc175b9c0f1b6a831c399e269772661'
-# hashlib.md5('a'.encode()).hexdigest()
-# '0cc175b9c0f1b6a831c399e269772661'
-# hashlib.md5('b'.encode()).hexdigest()
-# '92eb5ffee6ae2fec3ad71c777531578f'
+nn0 = NeuralNetwork()
+nn0_gv = nn0.print_gv()
+with open(".temp/nn0.gv", "w") as f:
+    f.write(nn0_gv)
+
+for i in range(1, 20):
+    nn.Mutator.mutate(nn0.data)
+    nn_gv = nn0.print_gv()
+    with open(".temp/nn%03d.gv" % i, "w") as f:
+        f.write(nn_gv)
+
+exit(0)
 
 nn0 = NeuralNetwork(1)
 
 nn.CalculatableParams.fill_deepness(nn0.data)
 
 hsh = nn.Hasher.caclulate_hash(nn0.data)
-
 
 for synapse in nn0.data.synapses:
     synapse.weight *= 0.7

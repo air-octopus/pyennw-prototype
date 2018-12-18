@@ -35,11 +35,11 @@ class SaveLoad:
             db.save_synapse(data.id, neurons[o.src].id, neurons[o.own].id, o.weight)
 
         # ... входных ...
-        for ind, sid in zip(data.input_neurons, data.extra_data["input_sids"]):
+        for ind, sid in zip(data.input_neurons_inds, data.extra_data["input_sids"]):
             db.save_nn_inputs(data.id, neurons[ind].id, sid)
 
         # ... и выходных нейронах
-        for ind, sid in zip(data.output_neurons, data.extra_data["output_sids"]):
+        for ind, sid in zip(data.output_neurons_inds, data.extra_data["output_sids"]):
             db.save_nn_outputs(data.id, neurons[ind].id, sid)
 
         db.sqldb.commit()
@@ -132,12 +132,12 @@ class SaveLoad:
         # todo: перенести сортировку в Builder._adapt_for_inputs_and_outputs() (...или просто разобраться где она будет смотреться более логично)
         inputs_inds = {sid: ind for ind, sid in enumerate(Engine.training_data().inputs)}
         inputs.sort(key = lambda x: inputs_inds[x[1]])
-        self.__data._input_neurons            = [ self._map_neuron_id2ind[id] for id, input_sid in inputs ]
+        self.__data._input_neurons_inds       = [ self._map_neuron_id2ind[id] for id, input_sid in inputs ]
         self.__data._extra_data["input_sids"] = [ input_sid                   for id, input_sid in inputs ]
 
     def _load_neuron_outputs(self, nnid):
         outputs = Engine.db().load_nn_outputs(nnid)
-        self.__data._output_neurons            = [ self._map_neuron_id2ind[id] for id, output_sid in outputs ]
+        self.__data._output_neurons_inds       = [ self._map_neuron_id2ind[id] for id, output_sid in outputs ]
         self.__data._extra_data["output_sids"] = [ output_sid                  for id, output_sid in outputs ]
 
     def _load_synapses(self, nnid):

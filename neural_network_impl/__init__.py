@@ -17,3 +17,5 @@ from neural_network_impl.data_saveload          import *
 from neural_network_impl.hasher                 import *
 from neural_network_impl.tf_calculations        import *
 from neural_network_impl.mutator                import *
+
+from neural_network_impl.transfer_functions     import *

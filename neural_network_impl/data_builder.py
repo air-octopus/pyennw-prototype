@@ -40,8 +40,7 @@ class Builder:
         self._data = d = nn.Data()
         self._adapt_for_inputs_and_outputs()
         self._calc_effective_deepness()
-        nn.CalculatableParams.fill_deepness(d)
-        nn.CalculatableParams.fill_hash(d)
+        nn.CalculatableParams.fill_all(d)
         self.__clear()
         return d
 
@@ -102,15 +101,15 @@ class Builder:
         # todo: добавить сортировку рецепторов и индикаторов в соответствии с порядком Engine.training_data().in/out
         # Note: сейчас сортировка выполняется в SaveLoad._load_neuron_inputs()
 
-        self.data._input_neurons  = self._temp_data.input_neurons
-        self.data._output_neurons = self._temp_data.output_neurons
+        self.data._input_neurons_inds  = self._temp_data.input_neurons
+        self.data._output_neurons_inds = self._temp_data.output_neurons
         self.data.extra_data["input_sids" ] =  Engine.training_data().inputs.copy()
         self.data.extra_data["output_sids"] =  Engine.training_data().outputs.copy()
 
     def _calc_effective_deepness(self):
         for n in self.data.neurons:
             n.deepness = -1
-        for i in self.data.input_neurons:
+        for i in self.data.input_neurons_inds:
             self._data._neurons[i].deepness = 0
 
         stop = False
