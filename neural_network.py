@@ -82,15 +82,46 @@ class NeuralNetwork:
         for i, s in enumerate(d.synapses):
             neuron_synapses[s.own].append(i)
 
+        input_neurons_to_neuron_ind = {d.neurons[i]: i for i in d.input_neurons_inds}
+        output_neurons_to_neuron_ind = {d.neurons[i]: i for i in d.output_neurons_inds}
+        input_neurons_to_label = {n: d.extra_data["input_sids"][i] for i, n in enumerate(d.input_neurons)}
+        output_neurons_to_label = {n: d.extra_data["output_sids"][i] for i, n in enumerate(d.output_neurons)}
+        worker_neurons_to_neuron_ind = {n: i for i, n in enumerate(d.neurons) if n not in input_neurons_to_neuron_ind}
+
+        input_rank_str = []
+        output_rank_str = []
+
         neurons_str = []
-        for ni, n in enumerate(d.neurons):
+
+        # for i in d.input_neurons_inds:
+        #     n = d.neurons[i]
+        #     neurons_str.append('    n%d [label="{<r> %s}", style=filled, fillcolor="0.5 0.3 1"];' % (i, input_neurons_to_label[n]))
+
+        for n, ni in worker_neurons_to_neuron_ind.items():
             neuron_synapses_str = "{" + "|".join(["<s%d> %.5f" % (si, d.synapses[si].weight) for si in neuron_synapses[ni]]) + "}|" if ni in neuron_synapses else ""
             neurons_str.append('    n%d [label="{%s<r>}"];' % (ni, neuron_synapses_str))
 
+        # for ni, n in enumerate(d.neurons):
+        #     if n in input_neurons_to_label:
+        #         neurons_str.append('    n%d [label="{<r> %s}", style=filled, fillcolor="0.5 0.3 1"];' % (ni, input_neurons_to_label[n]))
+        #     else:
+        #         neuron_synapses_str = "{" + "|".join(["<s%d> %.5f" % (si, d.synapses[si].weight) for si in neuron_synapses[ni]]) + "}|" if ni in neuron_synapses else ""
+        #         neurons_str.append('    n%d [label="{%s<r>}"];' % (ni, neuron_synapses_str))
 
         synapses_str = []
         for si, s in enumerate(d.synapses):
             synapses_str.append('    n%d:r -> n%d:s%d' % (s.src, s.own, si))
+
+        for n, l in input_neurons_to_label.items():
+            ni = input_neurons_to_neuron_ind[n]
+            neurons_str.append('    n%d [label="{<r> %s}", style=filled, fillcolor="0.5 0.3 1"];' % (ni, l))
+            input_rank_str.append('n%d' % ni)
+
+        for n, l in output_neurons_to_label.items():
+            ni = output_neurons_to_neuron_ind[n]
+            neurons_str.append('    out%d [label="{%s}", style=filled, fillcolor="0.2 0.3 1"];' % (ni, l))
+            synapses_str.append('    n%d:r -> out%d' % (ni, ni))
+            output_rank_str.append('out%d' % ni)
 
         result = '''digraph structs {
     node [shape=record];
@@ -98,8 +129,11 @@ class NeuralNetwork:
         
 %s
 
+    { rank = same; %s}
+    { rank = same; %s}
+
 %s
 }
-''' % ('\n'.join(neurons_str), '\n'.join(synapses_str))
+''' % ('\n'.join(neurons_str), ', '.join(input_rank_str), ', '.join(output_rank_str), '\n'.join(synapses_str))
 
         return result

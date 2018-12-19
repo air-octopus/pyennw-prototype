@@ -6,7 +6,7 @@
 # но не наоборот
 
 from neural_network_impl.data                   import *
-from neural_network_impl.calculatable_params    import *
+from neural_network_impl.estimator              import *
 
 from neural_network_impl.neuron                 import *
 from neural_network_impl.synapse                import *

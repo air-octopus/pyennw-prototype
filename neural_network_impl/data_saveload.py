@@ -94,6 +94,7 @@ class SaveLoad:
 
         (
               d._extra_data["parent_id"]
+            , d._hash
             , d._effective_deepness
             , d._response_time
             , d._resolving_ability

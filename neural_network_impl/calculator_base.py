@@ -49,13 +49,11 @@ class CalculatorBase:
         # В режиме вычислений -- tf.constant
         self._w   = None
 
-        # Разделим все нейроны на рецепторы и рабочие нейроны.
-        # Компонент 'in' соответствует рецепторам, а компоненты a1 и a2 -- рабочим нейронам
-        self._worker    = [(i, n) for i, n in enumerate(d.neurons) if not n.is_receptor]
+        worker = [(i, n) for i, n in enumerate(d.neurons) if not n.is_receptor]
 
         # отображения индексов нейронов в индексы рецепторов и рабочих нейронов
         neuron_ind_to_receptor_ind = {n: r for r,  n in enumerate(d.input_neurons_inds)}
-        neuron_ind_to_worker_ind   = {n: w for w, (n, o)  in enumerate(self._worker)}
+        neuron_ind_to_worker_ind   = {n: w for w, (n, o)  in enumerate(worker)}
 
         synapse_neuron_in_neuron_out_is_receptor = [[synapse_ind, synapse.src, synapse.own, d.neurons[synapse.src].is_receptor] for synapse_ind, synapse in enumerate(d.synapses)]
 
@@ -77,20 +75,11 @@ class CalculatorBase:
 
         # длины векторов в векторизованном представлении нейросети (для одной итерации)
         self._in_len  = len(d.input_neurons_inds )
-        self._a1_len  = len(self._worker         )
-        self._a2_len  = len(self._worker         )
+        self._a_len   = len(worker               )
         self._w_len   = len(d.synapses           )
         self._out_len = len(d.output_neurons_inds)
 
-        self._a_zeros_init = tf.constant([0] * self._a1_len, dtype=tf.float32)
-
-    def clear(self):
-        # все компоненты представлены списками, т.к. для обучения НС итерации вычислений
-        # должны быть развернуты на один батч. Соответственно каждой итерации соответствует один элемент в списке.
-        self._in  = []
-        self._a   = []
-        self._out = []
-        self._w   = None
+        self._a_zeros_init = tf.constant([0] * self._a_len, dtype=tf.float32)
 
     def _build_iteration_body(self, a2):
         """
@@ -100,14 +89,12 @@ class CalculatorBase:
                     Используется как вход для вычислений
         :return: кортеж (receptors, a1, indicators)
                     receptors -- плейсхолдеры для входных данных
-                    a1 -- результат вычислений на рабочих нейронах
-                    indixcators -- выходные данные (tf-тензоры)
+                    a1 -- результат вычислений на рабочих нейронах (tf-тензоры)
+                    indicators -- выходные данные (tf-тензоры)
         """
-        # номер итерации (в батче)
-        it_num = len(self._in or [])
 
         # входные данные
-        receptors = tf.placeholder(dtype=tf.float32, shape=[self._in_len], name="input_value_%d" % it_num)
+        receptors = tf.placeholder(dtype=tf.float32, shape=[self._in_len])
 
         # подготавливаем данные для свертки с массивом весов
         stitch_ind = []

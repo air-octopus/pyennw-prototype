@@ -19,22 +19,33 @@ create_engine(".temp/temp.db", "data/training-data.json")
 # engine = Engine(".temp/temp.db", "data/training-data.json")
 # engine = Engine.instance()
 
-td = Engine.training_data()
+# td = Engine.training_data()
+#
+# nn0 = NeuralNetwork()
+# nn0.save()
+# nn0_gv = nn0.print_gv()
+# with open(".temp/nn0.gv", "w") as f:
+#     f.write(nn0_gv)
+#
+# for i in range(1, 20):
+#     nn.Mutator.mutate(nn0.data)
+#     id = nn0.save()
+#     nn_gv = nn0.print_gv()
+#     with open(".temp/nn%03d.gv" % id, "w") as f:
+#         f.write(nn_gv)
+#
+# exit(0)
 
-nn0 = NeuralNetwork()
-nn0_gv = nn0.print_gv()
-with open(".temp/nn0.gv", "w") as f:
-    f.write(nn0_gv)
+nn0 = NeuralNetwork(3)
+calc = nn.CalculationFlow(nn0.data)
+calc.step([2, 1, 3])
+calc.step([2, 1, 3])
+calc.step([2, 1, 3])
+calc.step([2, 1, 3])
+calc.step([2, 1, 3])
+calc.step([2, 1, 3])
 
-for i in range(1, 20):
-    nn.Mutator.mutate(nn0.data)
-    nn_gv = nn0.print_gv()
-    with open(".temp/nn%03d.gv" % i, "w") as f:
-        f.write(nn_gv)
-
-exit(0)
-
-nn0 = NeuralNetwork(1)
+# nn0 = NeuralNetwork(1)
 
 nn.CalculatableParams.fill_deepness(nn0.data)
 

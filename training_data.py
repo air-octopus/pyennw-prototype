@@ -83,12 +83,18 @@ class TrainingData:
         while True:
             for ts in self._training_set:
                 yield TrainingData.Row(ts["in"], ts["out"])
-                # yield (ts["in"], ts["out"])
+
+    def training_set_portion(self, count):
+        result = []
+        for row in self.training_set_loopped():
+            result.append(row)
+            if len(result) >= count:
+                break
+        return result
 
     def training_set(self):
         for ts in self._training_set:
             yield TrainingData.Row(ts["in"], ts["out"])
-            # yield (ts["in"], ts["out"])
 
     def testing_set_size(self):
         return len(self._testing_set)
@@ -96,4 +102,3 @@ class TrainingData:
     def testing_set(self):
         for ts in self._testing_set:
             yield TrainingData.Row(ts["in"], ts["out"])
-            # yield (ts["in"], ts["out"])
