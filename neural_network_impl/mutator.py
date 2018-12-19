@@ -92,4 +92,4 @@ class Mutator:
         d._neurons = neurons_list
         d._synapses = synapses_list
 
-        nn.CalculatableParams.fill_all(d)
+        nn.Estimator.fill_all(d)

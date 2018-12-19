@@ -42,12 +42,27 @@ class NeuralNetwork:
     def data(self):
         return self._data
 
+    @property
+    def trainer(self):
+        if self._trainer is None:
+            self._trainer = nn.Trainer(self.data)
+        return self._trainer
+
+    @property
+    def calculator(self):
+        if self._calculator is None:
+            self._calculator = nn.CalcFlow(self.data)
+        return self._calculator
+
     def __init__(self, id=0):
 
         if id == 0:
             self._data = nn.Builder().build_protozoan()
         else:
             self._data = nn.SaveLoad().load(id)
+
+        self._trainer = None
+        self._calculator = None
 
     def save(self):
         # todo: реализовать вычисление времени отклика, качества и приспособленности НС
@@ -92,21 +107,9 @@ class NeuralNetwork:
         output_rank_str = []
 
         neurons_str = []
-
-        # for i in d.input_neurons_inds:
-        #     n = d.neurons[i]
-        #     neurons_str.append('    n%d [label="{<r> %s}", style=filled, fillcolor="0.5 0.3 1"];' % (i, input_neurons_to_label[n]))
-
         for n, ni in worker_neurons_to_neuron_ind.items():
             neuron_synapses_str = "{" + "|".join(["<s%d> %.5f" % (si, d.synapses[si].weight) for si in neuron_synapses[ni]]) + "}|" if ni in neuron_synapses else ""
             neurons_str.append('    n%d [label="{%s<r>}"];' % (ni, neuron_synapses_str))
-
-        # for ni, n in enumerate(d.neurons):
-        #     if n in input_neurons_to_label:
-        #         neurons_str.append('    n%d [label="{<r> %s}", style=filled, fillcolor="0.5 0.3 1"];' % (ni, input_neurons_to_label[n]))
-        #     else:
-        #         neuron_synapses_str = "{" + "|".join(["<s%d> %.5f" % (si, d.synapses[si].weight) for si in neuron_synapses[ni]]) + "}|" if ni in neuron_synapses else ""
-        #         neurons_str.append('    n%d [label="{%s<r>}"];' % (ni, neuron_synapses_str))
 
         synapses_str = []
         for si, s in enumerate(d.synapses):

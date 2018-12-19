@@ -18,7 +18,7 @@
 import tensorflow as tf
 import neural_network_impl as nn
 
-class CalculationFlow(nn.CalculatorBase):
+class CalcFlow(nn.CalculatorBase):
     def __init__(self, d : nn.Data):
         super().__init__(d)
 

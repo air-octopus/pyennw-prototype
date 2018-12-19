@@ -40,7 +40,7 @@ class Builder:
         self._data = d = nn.Data()
         self._adapt_for_inputs_and_outputs()
         self._calc_effective_deepness()
-        nn.CalculatableParams.fill_all(d)
+        nn.Estimator.fill_all(d)
         self.__clear()
         return d
 

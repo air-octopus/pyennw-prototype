@@ -37,7 +37,11 @@ create_engine(".temp/temp.db", "data/training-data.json")
 # exit(0)
 
 nn0 = NeuralNetwork(3)
-calc = nn.CalculationFlow(nn0.data)
+calc = nn0.calculator
+
+ts = Engine.training_data()
+nn.Estimator.estimate_adaptability(nn0.data, calc, [[2, 1, 3]], [[7, 5]])
+
 calc.step([2, 1, 3])
 calc.step([2, 1, 3])
 calc.step([2, 1, 3])
@@ -47,7 +51,7 @@ calc.step([2, 1, 3])
 
 # nn0 = NeuralNetwork(1)
 
-nn.CalculatableParams.fill_deepness(nn0.data)
+nn.Estimator.fill_deepness(nn0.data)
 
 hsh = nn.Hasher.caclulate_hash(nn0.data)
 
