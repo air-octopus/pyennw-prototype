@@ -12,16 +12,30 @@ import neural_network_impl as nn
 
 from neural_network import NeuralNetwork
 
-# if (os.access(".temp/temp.db", os.F_OK)):
-#     os.remove(".temp/temp.db")
+if (os.access(".temp/temp.db", os.F_OK)):
+    os.remove(".temp/temp.db")
 
 create_engine(".temp/temp.db", "data/training-data.json")
 # engine = Engine(".temp/temp.db", "data/training-data.json")
 # engine = Engine.instance()
 
 # td = Engine.training_data()
-#
+
 # nn0 = NeuralNetwork()
+nn0 = None
+
+for i in range(1, 20):
+    if nn0:
+        nn0.mutate()
+    else:
+        nn0 = NeuralNetwork()
+    nn0.train(50)
+    nn0.estimate(10)
+    id = nn0.save()
+    nn_gv = nn0.print_gv()
+    with open(".temp/nn%03d.gv" % id, "w") as f:
+        f.write(nn_gv)
+
 # nn0.save()
 # nn0_gv = nn0.print_gv()
 # with open(".temp/nn0.gv", "w") as f:
@@ -33,14 +47,16 @@ create_engine(".temp/temp.db", "data/training-data.json")
 #     nn_gv = nn0.print_gv()
 #     with open(".temp/nn%03d.gv" % id, "w") as f:
 #         f.write(nn_gv)
-#
-# exit(0)
+
+exit(0)
 
 nn0 = NeuralNetwork(3)
 calc = nn0.calculator
 
-ts = Engine.training_data()
-nn.Estimator.estimate_adaptability(nn0.data, calc, [[2, 1, 3]], [[7, 5]])
+ts = Engine.training_data().training_set_portion(17)
+data_in = [o.data_in for o in ts]
+data_desired = [o.data_out for o in ts]
+nn.Estimator.estimate_adaptability(nn0.data, calc, data_in, data_desired)
 
 calc.step([2, 1, 3])
 calc.step([2, 1, 3])

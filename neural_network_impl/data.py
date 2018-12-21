@@ -86,7 +86,7 @@ class Data:
         # todo: все невалидные значения перевести на None. Но предварительно надо реализовать их вычисления, иначе при записи в базу будет ошибка
 
         # эффективная глубина нейросети
-        self._effective_deepness        = -1
+        self._effective_deepness        = None
         # дополнительные данные, которые надо будет записать в БД
         self._extra_data                = {
             "parent"        : None ,
@@ -95,13 +95,13 @@ class Data:
         }
 
         # время реакции
-        self._response_time             = -1
+        self._response_time             = None
         # разрешающая временная способность НС
-        self._resolving_ability         = -1
+        self._resolving_ability         = -1 # todo: инициализировать None, потом вычислять
         # качество НС
-        self._quality                   = -1
+        self._quality                   = None
         # приспособляемость НС
-        self._adaptability              = -1
+        self._adaptability              = None
 
         self._hash = None
 

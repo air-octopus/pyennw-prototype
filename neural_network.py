@@ -4,10 +4,10 @@
 Методы описания нейронной сети и работы с ней в процессе обучения и/или использования
 """
 
-
+from engine import Engine
 import neural_network_impl as nn
-import collections
 
+import collections
 
 class NeuralNetwork:
     """
@@ -75,21 +75,52 @@ class NeuralNetwork:
         for neuron_ind, val in zip(self.data.input_neurons_inds, inputs):
             self.data.neurons[neuron_ind].axon[0] = val
 
+    def mutate(self):
+        nn.Mutator.mutate(self.data)
+        self._trainer = None
+        self._calculator = None
+
+    def train(self, steps_count):
+        # todo: steps_count необходимо оценивать в процессе тренировки (см. "ранняя остановка" в Гудфеллоу etc, 2018)
+#        try:
+            trainer = self.trainer
+            trainer.init(self.data.effective_deepness * 3)
+            trainer.training(steps_count)
+#        except:
+#            pass
+
+    def estimate(self, steps_count):
+        # todo: steps_count необходимо брать из исходных данных
+        response_time = 0
+        quality = 0
+        adaptability = 0
+        deepness = self.data.effective_deepness
+        for step, batch in zip(range(steps_count), Engine.training_data().training_set_batch_gen(deepness * 17)):
+            data_in = [o.data_in for o in batch]
+            data_desired = [o.data_out for o in batch][:deepness * 5]
+            o = nn.Estimator.estimate_adaptability(self.data, self.calculator, data_in, data_desired)
+            response_time += o[0]
+            quality       += o[1]
+            adaptability  += o[2]
+        self.data._response_time = response_time / steps_count
+        self.data._quality       = quality       / steps_count
+        self.data._adaptability  = adaptability  / steps_count
+
     def get_outputs(self):
         """
         Выгрузка выходных данных
         """
         return list(self.data.neurons[output_ind].axon[-1] for output_ind in self.data.output_neurons_inds)
 
-    def do_iteration(self, ):
-        # todo: реализовать через tensorflow
-        pass
-
-    def reset(self):
-        """
-        Сбросить состояние нейросети в исходное.
-        """
-        self.data.reset()
+    # def do_iteration(self, ):
+    #     # todo: реализовать через tensorflow
+    #     pass
+    #
+    # def reset(self):
+    #     """
+    #     Сбросить состояние нейросети в исходное.
+    #     """
+    #     self.data.reset()
 
     def print_gv(self):
         d = self.data
@@ -107,6 +138,23 @@ class NeuralNetwork:
         output_rank_str = []
 
         neurons_str = []
+        neurons_str.append(
+            '    info [label="{{'
+            'effective_deepness|'
+            'response_time|'
+            'resolving_ability|'
+            'quality|'
+            'adaptability'
+            '}|{'
+            '%g|%g|%g|%g|%g'
+            '}}"];' % (
+            d._effective_deepness,
+            d._response_time,
+            d._resolving_ability,
+            d._quality,
+            d._adaptability,
+        ))
+
         for n, ni in worker_neurons_to_neuron_ind.items():
             neuron_synapses_str = "{" + "|".join(["<s%d> %.5f" % (si, d.synapses[si].weight) for si in neuron_synapses[ni]]) + "}|" if ni in neuron_synapses else ""
             neurons_str.append('    n%d [label="{%s<r>}"];' % (ni, neuron_synapses_str))

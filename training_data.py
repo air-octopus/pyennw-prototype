@@ -76,6 +76,10 @@ class TrainingData:
                 self._db.add_outputs(outputs[i])
             self._db.sqldb.commit()
 
+    # todo: переделать логику работы с разделением на training/testing
+    # основной класс должен только выдавать наружу генераторы
+    # над которыми уже должны строится обертки типа "size", "looped", "batch", ...
+
     def training_set_size(self):
         return len(self._training_set)
 
@@ -95,6 +99,16 @@ class TrainingData:
     def training_set(self):
         for ts in self._training_set:
             yield TrainingData.Row(ts["in"], ts["out"])
+
+    def training_set_batch_gen(self, batch_len):
+        batch = None
+        for ts in self.training_set_loopped():
+            if batch is None:
+                batch = []
+            batch.append(ts)
+            if len(batch) >= batch_len:
+                yield batch
+                batch = None
 
     def testing_set_size(self):
         return len(self._testing_set)

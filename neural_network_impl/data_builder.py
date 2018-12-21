@@ -39,6 +39,7 @@ class Builder:
         self._temp_data = Builder.TempData()
         self._data = d = nn.Data()
         self._adapt_for_inputs_and_outputs()
+        d._response_time = 0
         self._calc_effective_deepness()
         nn.Estimator.fill_all(d)
         self.__clear()

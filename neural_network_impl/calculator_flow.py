@@ -51,3 +51,6 @@ class CalcFlow(nn.CalculatorBase):
         self._a_data = result[0]
 
         return result[1]
+
+    def multi(self, receptors_array):
+        return [self.step(receptors) for receptors in receptors_array]

@@ -45,6 +45,8 @@ class Trainer(nn.CalculatorBase):
     def init(self, iterations_count):
         assert iterations_count > 0
 
+        tf.reset_default_graph()
+
         # все компоненты представлены списками, т.к. для обучения НС итерации вычислений
         # должны быть развернуты на один батч. Соответственно каждой итерации соответствует один элемент в списке.
         self._in      = []
@@ -57,7 +59,8 @@ class Trainer(nn.CalculatorBase):
             self._add_iteration()
 
         self._loss = None
-        skip = (int)(self._data._response_time)
+        #skip = (int)(self._data._response_time)
+        skip = 0 # MK_DEBUG
         for out in self._out:
             desired = tf.placeholder(dtype=tf.float32, shape=out.shape)
             self._desired.append(desired)
@@ -115,7 +118,7 @@ class Trainer(nn.CalculatorBase):
         В режиме тренировки нейросеть разворачивается сразу на несколько итераций.
         """
         # текущие выходные значения рабочих нейронов
-        a2 = self._a[-1] if len(self._a) > 0 else self._a_zeros_init
+        a2 = self._a[-1] if len(self._a) > 0 else tf.constant([0] * self._a_len, dtype=tf.float32)
 
         receptors, a1, indicators = self._build_iteration_body(a2)
 
@@ -123,21 +126,37 @@ class Trainer(nn.CalculatorBase):
         self._a  .append(a1        )
         self._out.append(indicators)
 
+    # def _training_set_batch(self, steps_count):
+    #     batch = None
+    #     batch_len = len(self._in)
+    #     step = 0
+    #     for ts in Engine.training_data().training_set_loopped():
+    #         if batch is None:
+    #             batch_len = len(self._in)
+    #             batch = []
+    #             #batch = [[], []]
+    #         batch.append(ts)
+    #         # batch[0].append(ts.data_in)
+    #         # batch[1].append(ts.data_out)
+    #         if len(batch) >= batch_len:
+    #             yield batch
+    #             step += 1
+    #             if step >= steps_count:
+    #                 return
+    #             batch = None
     def _training_set_batch(self, steps_count):
-        batch = None
-        batch_len = len(self._in)
-        step = 0
-        for ts in Engine.training_data().training_set_loopped():
-            if batch is None:
-                batch_len = len(self._in)
-                batch = []
-                #batch = [[], []]
-            batch.append(ts)
-            # batch[0].append(ts.data_in)
-            # batch[1].append(ts.data_out)
-            if len(batch) >= batch_len:
-                yield batch
-                step += 1
-                if step >= steps_count:
-                    return
-                batch = None
+        for step, batch in zip(range(steps_count), Engine.training_data().training_set_batch_gen(len(self._in))):
+            yield batch
+            # if batch is None:
+            #     batch_len = len(self._in)
+            #     batch = []
+            #     #batch = [[], []]
+            # batch.append(ts)
+            # # batch[0].append(ts.data_in)
+            # # batch[1].append(ts.data_out)
+            # if len(batch) >= batch_len:
+            #     yield batch
+            #     step += 1
+            #     if step >= steps_count:
+            #         return
+            #     batch = None

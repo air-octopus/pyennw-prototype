@@ -79,7 +79,7 @@ class CalculatorBase:
         self._w_len   = len(d.synapses           )
         self._out_len = len(d.output_neurons_inds)
 
-        self._a_zeros_init = tf.constant([0] * self._a_len, dtype=tf.float32)
+        #self._a_zeros_init = tf.constant([0] * self._a_len, dtype=tf.float32)
 
     def _build_iteration_body(self, a2):
         """

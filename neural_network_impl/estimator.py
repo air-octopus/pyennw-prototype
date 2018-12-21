@@ -48,31 +48,22 @@ class Estimator:
 
     @classmethod
     def estimate_adaptability(cls, d : nn.Data, calc, src_arr, desired_arr):
-        result_arr = np.array([ calc.step(src) for src in src_arr ])
-        # response_time_estim = np.correlate(result_arr, desired_arr)
-        #
-        #
-        # offset = int(d.response_time + 0.5)
-        # if offset > 0:
-        #     desired_arr = desired_arr[offset:]
-        #     result_arr = result_arr[:-offset]
+        # result_arr = np.array(calc.multi(src_arr))
+        result_arr = calc.multi(src_arr)
+        squared_difference = cls._calc_squared_difference_shifted(result_arr, desired_arr)
 
-        ooo = np.argmin(cls._calc_squared_difference_shifted(result_arr, desired_arr))
+        response_time = np.argmin(squared_difference)
+        quality = squared_difference[response_time]
+        adaptability = (response_time + 1) * quality
 
-        # ooo = np.convolve(result_arr, desired_arr)
-        # ooo = np.correlate(result_arr, desired_arr)
-
-        pass
-
-        # sp.convolve()
-        #
-        # sp.argmax()
-        # stat.pearsonr()
-        #
-        # d._
+        return (
+            response_time , # response_time
+            quality       , # quality
+            adaptability    # adaptability
+        )
 
     @classmethod
-    def _calc_squared_difference_shifted(cls, a, b, shift_range=None):
+    def _calc_squared_difference_shifted(cls, a, b):
         """
 
         :param a:
@@ -80,10 +71,10 @@ class Estimator:
         :return:
         """
 
-        cnt = len(a)
-
-        if shift_range is None:
-            shift_range = range(-len(a) + 1, len(a))
+        la = len(a)
+        lb = len(b)
+        assert la >= lb
+        cnt = la - lb + 1
 
         def sqrdiff(aa, bb):
             aa = np.reshape(aa, (-1))
@@ -91,21 +82,8 @@ class Estimator:
             cc = aa - bb
             return np.matmul(cc, cc)
 
-        result = np.ndarray(cnt*2 - 1)
-        for i, offset in enumerate(shift_range):
-            if offset >= 0:
-                o = offset
-                result[i] = sqrdiff(a[o:], b[:o])
-            else:
-                o = -offset
-                result[i] = sqrdiff(a[:o], b[o:])
+        result = np.ndarray(cnt)
+        for offset in range(cnt):
+                result[offset] = sqrdiff(a[offset:offset + lb], b)
 
         return result
-
-
-    # @classmethod
-    # def _convolution_with_offset
-    #
-    #
-    #     # todo: to be imlemented
-    #     pass
