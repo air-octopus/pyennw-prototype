@@ -5,12 +5,11 @@
 """
 
 from engine import Engine
+from neural_network import NeuralNetwork
 
 class EvolutionProcessor:
-    def __init__(self, engine : Engine):
-        self.engine = engine
-        self.conductor = engine.conductor
-        self.neural_network_loader = engine.neural_network_loader
+    def __init__(self):
+        self.conductor = Engine.conductor()
 
 
     def start_evolution(self):
@@ -25,14 +24,15 @@ class EvolutionProcessor:
         * обучаем и оцениваем нейросеть
         * сохраняем нейросеть в базу и в очередь эволюции
         """
-        nnid = self.conductor.next()
-        nn = self.neural_network_loader.load_neural_network(nnid)
+        id = self.conductor.next()
+        nn = NeuralNetwork(id)
 
-        # todo: мутация
-        # todo: обучение и последующая оценка нейросети
+        nn.mutate()
+        nn.train(steps_count=50)
+        nn.estimate(steps_count=10)
 
-        nn.save(self.engine)
-        self.conductor.add(nn.nnid, nn.adaptability)
+        id = nn.save()
+        self.conductor.add(id, nn.data.adaptability)
 
 
 

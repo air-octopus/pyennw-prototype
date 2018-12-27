@@ -145,6 +145,13 @@ class NeuralNetworkDB:
                 "SELECT id FROM nn_species_all WHERE is_alive != 0")
         return [o[0] for o in q]
 
+    def extinct_species(self, species_ids):
+        """
+        помечаем массив видов как вымершие
+        """
+        q = "UPDATE nn_species_all SET is_alive=0 WHERE id in (%s)" % ",".join([str(id) for id in species_ids])
+        self._cursor.execute(q)
+
     def load_species(self, species_id):
         """
         :param species_id: идентификатор нейросети

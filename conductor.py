@@ -10,7 +10,7 @@ class Conductor:
     def __init__(self):
         # очереди нейросетей. Содержат кортежи с данными вида:
         #   (id, adaptability)
-        # adaptability=0 означает наименее приспособленную сеть
+        # adaptability=0 означает наиболее приспособленную сеть
         self._nn_queue_active = Engine.db().get_alive_species()
         self._nn_queue_pending = []
         if len(self._nn_queue_active) == 0:
@@ -19,17 +19,24 @@ class Conductor:
     def next(self):
         if len(self._nn_queue_active) == 0:
             self._nn_queue_pending, self._nn_queue_active = self._nn_queue_active, self._nn_queue_pending
-            self._nn_queue_active.sort(key=lambda x: x[1], reverse=True)
-            max_len = Engine.config().alive_neural_network_queue_len()
-            # todo: при удалении сетей из очереди их надо помечать неактивными в базе данных
+            self._nn_queue_active.sort(key=lambda x: x[1])
+            max_len = Engine.config().alive_neural_network_queue_len
             if len(self._nn_queue_active) > max_len:
+                Engine.db().extinct_species(self._nn_queue_active[max_len:])
                 self._nn_queue_active = self._nn_queue_active[:max_len]
 
         o = self._nn_queue_active[-1]
         self._nn_queue_active.pop()
-        self._nn_queue_pending.append(o)
+        self.add(o[0], o[1])
         return o[0]
 
 
     def add(self, id, adaptability):
-        self._nn_queue_pending.append((id, adaptability))
+        if id:
+            self._nn_queue_pending.append((id, adaptability))
+
+    def get_best(self):
+        key = lambda o: o[1]
+        m1 = max(self._nn_queue_active, key=key)
+        m2 = max(self._nn_queue_pending, key=key)
+        return max(m1, m2, key=key)

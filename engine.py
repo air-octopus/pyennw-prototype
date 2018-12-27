@@ -19,6 +19,11 @@ class Engine:
     def training_data(cls): return cls._instance._training_data
 
     @classmethod
+    def conductor(cls): return cls._instance._conductor
+    @classmethod
+    def evolution_processor(cls): return cls._instance._evolution_processor
+
+    @classmethod
     def destroy(cls): cls._instance = None
 
     def __init__(self):

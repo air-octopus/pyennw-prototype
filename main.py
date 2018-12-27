@@ -22,19 +22,20 @@ create_engine(".temp/temp.db", "data/training-data.json")
 # td = Engine.training_data()
 
 # nn0 = NeuralNetwork()
-nn0 = None
 
-for i in range(1, 20):
-    if nn0:
-        nn0.mutate()
-    else:
-        nn0 = NeuralNetwork()
-    nn0.train(50)
-    nn0.estimate(10)
-    id = nn0.save()
-    nn_gv = nn0.print_gv()
-    with open(".temp/nn%03d.gv" % id, "w") as f:
-        f.write(nn_gv)
+# nn0 = None
+#
+# for i in range(1, 20):
+#     if nn0:
+#         nn0.mutate()
+#     else:
+#         nn0 = NeuralNetwork()
+#     nn0.train(steps_count=50)
+#     nn0.estimate(steps_count=10)
+#     id = nn0.save()
+#     nn_gv = nn0.print_gv()
+#     with open(".temp/nn%03d.gv" % id, "w") as f:
+#         f.write(nn_gv)
 
 # nn0.save()
 # nn0_gv = nn0.print_gv()
@@ -47,6 +48,49 @@ for i in range(1, 20):
 #     nn_gv = nn0.print_gv()
 #     with open(".temp/nn%03d.gv" % id, "w") as f:
 #         f.write(nn_gv)
+
+proc = Engine.evolution_processor()
+proc.step()
+proc.step()
+proc.step()
+proc.step()
+proc.step()
+proc.step()
+proc.step()
+proc.step()
+proc.step()
+proc.step()
+proc.step()
+proc.step()
+proc.step()
+proc.step()
+proc.step()
+proc.step()
+proc.step()
+proc.step()
+proc.step()
+proc.step()
+proc.step()
+proc.step()
+proc.step()
+proc.step()
+proc.step()
+proc.step()
+proc.step()
+
+id = Engine.conductor().get_best()
+ids = []
+while id:
+    n = NeuralNetwork(id)
+    ids.append(id)
+    id = n.data.extra_data["parent"]
+
+ids.reverse()
+for i, id in enumerate(ids):
+    n = NeuralNetwork(id)
+    n_gv = n.print_gv()
+    with open(".temp/nn_%03d_%03d.gv" % (i, id), "w") as f:
+        f.write(n_gv)
 
 exit(0)
 
