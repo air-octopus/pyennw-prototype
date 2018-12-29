@@ -11,13 +11,11 @@ class Test_SimpleNetwork(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        if (os.access("../.temp/unittest_simple.db", os.F_OK)):
-            os.remove("../.temp/unittest_simple.db")
-        create_engine("../.temp/unittest_simple.db", "training-data--unittest-simple.json")
+        create_engine(":memory:", "training-data--unittest-simple.json")
 
     @classmethod
     def tearDownClass(cls):
-        pass
+        Engine.destroy()
 
     def test__neural_network_creation(self):
         nn0 = NeuralNetwork()

@@ -54,6 +54,12 @@ class NeuralNetwork:
             self._calculator = nn.CalcFlow(self.data)
         return self._calculator
 
+    @classmethod
+    def from_json(cls, json_str):
+        new_nn = NeuralNetwork()
+        new_nn.data.deserialize_json(json_str)
+        return new_nn
+
     def __init__(self, id=0):
 
         if id == 0:
@@ -111,16 +117,6 @@ class NeuralNetwork:
         Выгрузка выходных данных
         """
         return list(self.data.neurons[output_ind].axon[-1] for output_ind in self.data.output_neurons_inds)
-
-    # def do_iteration(self, ):
-    #     # todo: реализовать через tensorflow
-    #     pass
-    #
-    # def reset(self):
-    #     """
-    #     Сбросить состояние нейросети в исходное.
-    #     """
-    #     self.data.reset()
 
     def print_gv(self):
         d = self.data

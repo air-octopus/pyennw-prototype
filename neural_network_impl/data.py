@@ -3,6 +3,8 @@
 import copy
 import json
 
+import neural_network_impl as nn
+
 class Data:
     """
     Данные, которыми оперирует нейросеть.
@@ -148,10 +150,12 @@ class Data:
             "resolving_ability" : self._resolving_ability ,
             "quality"           : self._quality           ,
             "adaptability"      : self._adaptability      ,
+            "hash"              : self._hash              ,
             "extra_data"        : self._extra_data        ,
             "neurons"           : [ {
-                "id:"                      : i + 1                      ,
+                "id"                       : i + 1                      ,
                 "axon_len"                 : len(n.axon)                ,
+                "bias"                     : n.bias                     ,
                 "transfer_function_type"   : n.transfer_function_type   ,
                 "transfer_function_params" : n.transfer_function_params ,
                 "deepness"                 : n.deepness
@@ -166,4 +170,39 @@ class Data:
         },
         indent=4)
 
+
+    def deserialize_json(self, json_str):
+        j = json.loads(json_str)
+        j_neurons = j["neurons"]
+        j_synapses = j["synapses"]
+
+        self._effective_deepness = j["effective_deepness"]
+        self._response_time      = j["response_time"     ]
+        self._resolving_ability  = j["resolving_ability" ]
+        self._quality            = j["quality"           ]
+        self._adaptability       = j["adaptability"      ]
+        self._extra_data         = j["extra_data"        ]
+
+        n_id_to_ind = {}
+        self._neurons = []
+        for jn in j_neurons:
+            ind = len(self._neurons)
+            n_id_to_ind[jn["id"]] = ind
+            self._neurons.append(nn.Neuron(
+                [0] * jn["axon_len"],
+                jn["bias"                    ],
+                jn["transfer_function_type"  ],
+                jn["transfer_function_params"]
+            ))
+
+        self._synapses = [ nn.Synapse(
+            n_id_to_ind[js["src"]],
+            n_id_to_ind[js["own"]],
+            js["weight"]
+        ) for js in j_synapses ]
+
+        self._input_neurons_inds  = [ n_id_to_ind[id] for id in j["input_neurons"] ]
+        self._output_neurons_inds = [ n_id_to_ind[id] for id in j["output_neurons"] ]
+
+        nn.Estimator.fill_all(self)
 

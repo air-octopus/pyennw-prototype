@@ -34,6 +34,7 @@ class CalcFlow(nn.CalculatorBase):
         self._a_data = [0] * self._a_len
 
         self._w = tf.constant([synapse.weight for synapse in self._data.synapses], dtype=tf.float32)
+        self._b = tf.constant([self._data.neurons[i].bias for i in self._indices_stitch_workers], dtype=tf.float32)
         self._a2 = tf.placeholder(dtype=tf.float32, shape=[self._a_len])
 
         self._in, self._a1, self._out = self._build_iteration_body(self._a2)

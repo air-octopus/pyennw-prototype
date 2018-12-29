@@ -11,6 +11,7 @@ N!B! в настоящее время поддерживаются только 
     * a1 : вектор первых элементов аксонов
     * a2 : вектор вторых элементов аксонов
     * w  : вектор весов
+    * b  : вектор смещений
     * out: выходные данные
     * p# : разного рода промежуточные данные
 
@@ -44,10 +45,11 @@ class CalculatorBase:
         # массив выходных данных
         self._out = None
 
-        # тензор весов.
-        # В режиме тренировки представляет собой экземпляр tf.Variable()
+        # тензоры весов и смещенй.
+        # В режиме тренировки представляют собой экземпляры tf.Variable()
         # В режиме вычислений -- tf.constant
         self._w   = None
+        self._b   = None
 
         worker = [(i, n) for i, n in enumerate(d.neurons) if not n.is_receptor]
 
@@ -120,7 +122,9 @@ class CalculatorBase:
 
         p5 = tf.gather(p4, self._indices_gather_synapses_for_sum)
 
-        a1 = tf.segment_sum(p5, self._indices_segment_sum_synapses)
+        p6 = tf.segment_sum(p5, self._indices_segment_sum_synapses)
+
+        a1 = p6 + self._b
 
         # todo: добавить функцию активации
 

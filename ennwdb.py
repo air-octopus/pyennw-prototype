@@ -191,6 +191,7 @@ class NeuralNetworkDB:
                   id
                 , transfer_function_type
                 , transfer_function_params
+                , bias
                 , axon_length
             FROM neuron_bodies
             WHERE
@@ -284,13 +285,13 @@ class NeuralNetworkDB:
             , effective_deepness
             , response_time
             , resolving_ability
-            , quality
-            , adaptability
+            , quality or -1
+            , adaptability or -1
         )
         self._cursor.execute(q)
         return self._cursor.lastrowid
 
-    def save_neuron_body(self, species_id, transfer_function_type, transfer_function_params, axon_length):
+    def save_neuron_body(self, species_id, transfer_function_type, transfer_function_params, bias, axon_length):
         """
         Сохранение данных в таблицу neuron_bodies
         :param species_id: идентификатор нейросети
@@ -305,14 +306,16 @@ class NeuralNetworkDB:
                   species_id
                 , transfer_function_type
                 , transfer_function_params
+                , bias
                 , axon_length
             ) VALUES (
-                %d, %d, '%s', %d
+                %d, %d, '%s', %.7f, %d
             )
         """ % (
             species_id
             , transfer_function_type
             , transfer_function_params
+            , bias
             , axon_length
         )
         self._cursor.execute(q)

@@ -28,7 +28,7 @@ class SaveLoad:
         neurons = data.neurons
         # сохраняем параметры нейронов и получаем их идентификаторы
         for o in neurons:
-            o.id = db.save_neuron_body(data.id, o.transfer_function_type, json.dumps(o.transfer_function_params), len(o.axon))
+            o.id = db.save_neuron_body(data.id, o.transfer_function_type, json.dumps(o.transfer_function_params), o.bias, len(o.axon))
 
         # сохраняем информацию о синапсах ...
         for o in data.synapses:
@@ -121,8 +121,8 @@ class SaveLoad:
     def _load_neuron_bodies(self, nnid):
         neurons_data = Engine.db().load_neurons_data(nnid)
         neurons = [
-            (id, nn.Neuron([0] * axon_len, tf_type, json.loads(tf_params)))
-            for id, tf_type, tf_params, axon_len
+            (id, nn.Neuron([0] * axon_len, bias, tf_type, json.loads(tf_params)))
+            for id, tf_type, tf_params, bias, axon_len
             in neurons_data
         ]
         self.__data._neurons = [n[1] for n in neurons]

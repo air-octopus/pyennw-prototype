@@ -41,9 +41,9 @@ class TrainingData:
         self.load_str(json_str)
 
     def load_file(self, file_name):
-        f = open(file=file_name)
-        s = f.read()
-        self.load_str(s)
+        with open(file=file_name) as f:
+            s = f.read()
+            self.load_str(s)
 
     def load_str(self, str):
         j = json.loads(str)

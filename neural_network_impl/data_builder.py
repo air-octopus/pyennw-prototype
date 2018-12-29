@@ -49,7 +49,7 @@ class Builder:
         new_neuron_ind = len(self.data.neurons)
         new_neuron_tf = Type.relu
         new_neuron_tf_params = ()
-        new_neuron = nn.Neuron([0], new_neuron_tf, new_neuron_tf_params)
+        new_neuron = nn.Neuron([0], 0, new_neuron_tf, new_neuron_tf_params)
 
         self._temp_data._map_input_sid2ind [input_data_name] = new_neuron_ind
         self.data.neurons.append(new_neuron)
@@ -58,7 +58,7 @@ class Builder:
         new_neuron_ind = len(self.data.neurons)
         new_neuron_tf = Type.linear
         new_neuron_tf_params = ()
-        new_neuron = nn.Neuron([0, 0], new_neuron_tf, new_neuron_tf_params)
+        new_neuron = nn.Neuron([0, 0], 0, new_neuron_tf, new_neuron_tf_params)
         # В настоящее время при создании нейрона-индикатора он присоединяется напрямую к рецептору
         # (у которого глубина по-определению равна нулю),
         # поэтому в данном случае глубина индикатора будет 1

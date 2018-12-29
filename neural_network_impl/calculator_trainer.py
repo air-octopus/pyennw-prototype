@@ -22,22 +22,22 @@ class Trainer(nn.CalculatorBase):
     def __init__(self, d : nn.Data):
         super().__init__(d)
 
-        # Массивы тензоров векторизованного представления нейросети.
+        # # Массивы тензоров векторизованного представления нейросети.
+        # #
+        # # В режиме тренировки нейросети входные данные бьются на батчи по несколько записей.
+        # # Каждой записи соответствует одна итерация работы нейросети и, соответственно,
+        # # один элемент в этих массивах
         #
-        # В режиме тренировки нейросети входные данные бьются на батчи по несколько записей.
-        # Каждой записи соответствует одна итерация работы нейросети и, соответственно,
-        # один элемент в этих массивах
-
-        # массив tf-плейсхолдеров для входных данных.
-        self._in  = None
-        # массив данных в аксонах
-        self._a   = None
-        # массив выходных данных
-        self._out = None
-
-        # тензор весов.
-        # В режиме тренировки представляет собой экземпляр tf.Variable()
-        self._w   = None
+        # # массив tf-плейсхолдеров для входных данных.
+        # self._in  = None
+        # # массив данных в аксонах
+        # self._a   = None
+        # # массив выходных данных
+        # self._out = None
+        #
+        # # тензор весов.
+        # # В режиме тренировки представляет собой экземпляр tf.Variable()
+        # self._w   = None
 
         # функция потерь, которая будет минимизироваться в процессе тренировки
         self._loss = None
@@ -54,13 +54,14 @@ class Trainer(nn.CalculatorBase):
         self._out     = []
         self._desired = []
         self._w = tf.Variable([synapse.weight for synapse in self._data.synapses], dtype=tf.float32)
+        self._b = tf.Variable([neuron.bias for neuron in self._data.neurons], dtype=tf.float32)
 
         for i in range(iterations_count):
             self._add_iteration()
 
         self._loss = None
-        #skip = (int)(self._data._response_time)
-        skip = 0 # MK_DEBUG
+        skip = (int)(self._data._response_time)
+        # skip = 0 # MK_DEBUG
         for out in self._out:
             desired = tf.placeholder(dtype=tf.float32, shape=out.shape)
             self._desired.append(desired)
@@ -104,9 +105,11 @@ class Trainer(nn.CalculatorBase):
             # all_data = sess.run(all_data, feed_dict=feed_data)
             pass
 
-        weights = sess.run(self._w)
+        weights, biases = sess.run((self._w, self._b))
         for synapse, w in zip(self._data.synapses, weights):
             synapse.weight = w
+        for neuron, b in zip(self._data.neurons, biases):
+            neuron.bias = b
 
         # todo: вынести отдельно весь код оценки нейросети
         # сейчас для простоты используем вычисленное значение функции потерь,
