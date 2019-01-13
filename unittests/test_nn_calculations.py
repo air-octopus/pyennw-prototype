@@ -18,12 +18,12 @@ nn_json = """
         "output_sids": [ "unittest_simple" ]
     },
     "neurons": [
-        { "id": 1, "axon_len": 1, "bias": 0, "transfer_function_type": 2, "transfer_function_params": [] },
-        { "id": 2, "axon_len": 1, "bias": 0, "transfer_function_type": 2, "transfer_function_params": [] },
-        { "id": 3, "axon_len": 1, "bias": 0, "transfer_function_type": 2, "transfer_function_params": [] },
-        { "id": 4, "axon_len": 2, "bias": 0, "transfer_function_type": 1, "transfer_function_params": [] },
+        { "id": 1, "axon_len": 1, "bias": 0, "transfer_function_type": 1, "transfer_function_params": [] },
+        { "id": 2, "axon_len": 1, "bias": 0, "transfer_function_type": 1, "transfer_function_params": [] },
+        { "id": 3, "axon_len": 1, "bias": 0, "transfer_function_type": 1, "transfer_function_params": [] },
+        { "id": 4, "axon_len": 2, "bias": 0, "transfer_function_type": 2, "transfer_function_params": [] },
         { "id": 5, "axon_len": 2, "bias": 0, "transfer_function_type": 1, "transfer_function_params": [] },
-        { "id": 6, "axon_len": 2, "bias": 0, "transfer_function_type": 1, "transfer_function_params": [] }
+        { "id": 6, "axon_len": 2, "bias": 0, "transfer_function_type": 2, "transfer_function_params": [] }
     ],
     "synapses": [
         { "src": 1, "own": 5, "weight": 1 },
@@ -63,7 +63,11 @@ class Test_NeuralNetworkCalculations(unittest.TestCase):
         ])
         r = [ list(o) for o in r ]
 
+        # должно быть sigmoid([[0.0], [3.0], [5.0], [5.0], [5.0], [5.0]])
         self.assertEqual(r, [[0.0], [3.0], [5.0], [5.0], [5.0], [5.0]])
+
+        # todo: добавить тесты на использование transfer functions
+        # для сигмоиды будет [[0.5], [0.95257413], [0.9933072], [0.9933072], [0.9933072], [0.9933072]]
 
         pass
 

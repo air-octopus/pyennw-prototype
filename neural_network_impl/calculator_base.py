@@ -20,8 +20,10 @@ Calculator работает в двух режимах:
     * потоковый режим вычислений на НС (см. calculator_flow.py)
 """
 
+import collections
 import tensorflow as tf
 import neural_network_impl as nn
+from neural_network_impl.transfer_functions import Type
 
 class CalculatorBase:
 
@@ -75,13 +77,28 @@ class CalculatorBase:
 
         self._indices_gather_indicators  = [neuron_ind_to_worker_ind[neuron_ind] for neuron_ind in d.output_neurons_inds]
 
+        applying_transfer_functions_data = collections.defaultdict(list)
+        for indw, (indn, n) in enumerate(worker):
+            applying_transfer_functions_data[n.transfer_function_type].append(indw)
+
+        self._indices_gather_workers_for_applying_transfer_functions = [(tf_type, indices) for tf_type, indices in applying_transfer_functions_data.items()]
+        self._indices_stich_workers_after_applying_transfer_functions = [indices for tf_type, indices in self._indices_gather_workers_for_applying_transfer_functions]
+
         # длины векторов в векторизованном представлении нейросети (для одной итерации)
         self._in_len  = len(d.input_neurons_inds )
         self._a_len   = len(worker               )
         self._w_len   = len(d.synapses           )
         self._out_len = len(d.output_neurons_inds)
 
-        #self._a_zeros_init = tf.constant([0] * self._a_len, dtype=tf.float32)
+    def _apply_transfer_function(self, tensor, tf_type, tf_params):
+        if tf_type == Type.linear:
+            return tensor
+        elif tf_type == Type.relu:
+            return tf.nn.relu(tensor)
+        elif tf_type == Type.logistic:
+            return tf.nn.sigmoid(tensor)
+        else:
+            assert 0
 
     def _build_iteration_body(self, a2):
         """
@@ -124,10 +141,19 @@ class CalculatorBase:
 
         p6 = tf.segment_sum(p5, self._indices_segment_sum_synapses)
 
-        a1 = p6 + self._b
+        p7 = p6 + self._b
 
-        # todo: добавить функцию активации
+        if len(self._indices_gather_workers_for_applying_transfer_functions) > 0:
+            p8 = []
+            for tf_type, indices in self._indices_gather_workers_for_applying_transfer_functions:
+                p8.append(self._apply_transfer_function(tf.gather(p7, indices), tf_type, None))
+                # todo: добавить вычисление функции активации в зависимости от типа tf_type
 
+            p9 = tf.dynamic_stitch(self._indices_stich_workers_after_applying_transfer_functions, p8)
+        else:
+            p9 = p7
+
+        a1 = p9
         indicators = tf.gather(a1, self._indices_gather_indicators)
 
         return (receptors, a1, indicators)
