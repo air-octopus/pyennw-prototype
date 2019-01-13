@@ -20,7 +20,9 @@ class Mutator:
         while data.hash == hash:
             cls._do_mutate(data)
             counter += 1
-        pass
+
+        data._extra_data["parent_id"] = data.id
+        data._id = None
 
     @classmethod
     def _do_mutate(cls, data : nn.Data):
@@ -67,7 +69,7 @@ class Mutator:
                     synapses_to_add.add(nn.Synapse(n1, n3, 1))
                     connections.add((n1, n3))
             if r.uniform(0, 1) < c.mutator_neuron_adding_probability_factor:
-                n2 = nn.Neuron([0, 0], nn.Type.relu, ())
+                n2 = nn.Neuron([0, 0], 0, nn.Type.relu, ())
                 neurons_to_add.add(n2)
                 synapses_to_add.add(nn.Synapse(n1, n2, 1))
                 synapses_to_add.add(nn.Synapse(n2, n3, 1))

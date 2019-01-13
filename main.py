@@ -51,6 +51,7 @@ create_engine(".temp/temp.db", "data/training-data.json")
 
 proc = Engine.evolution_processor()
 for i in range(30):
+    print("step: %d" % (i))
     proc.step()
 
 # proc.step()
@@ -80,7 +81,7 @@ for i in range(30):
 # proc.step()
 # proc.step()
 
-id = Engine.conductor().get_best()
+id = Engine.conductor().get_best()[0]
 ids = []
 while id:
     n = NeuralNetwork(id)

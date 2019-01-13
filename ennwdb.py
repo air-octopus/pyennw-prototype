@@ -142,8 +142,8 @@ class NeuralNetworkDB:
         :return: список идентификаторов живых сетей
         """
         q = self._cursor.execute(
-                "SELECT id FROM nn_species_all WHERE is_alive != 0")
-        return [o[0] for o in q]
+                "SELECT id, adaptability FROM nn_species_all WHERE is_alive != 0")
+        return list(q) # [o[0] for o in q]
 
     def extinct_species(self, species_ids):
         """

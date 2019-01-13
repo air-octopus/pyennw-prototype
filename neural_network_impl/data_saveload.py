@@ -63,7 +63,7 @@ class SaveLoad:
         # d._adaptability            = j["adaptability"           ]
         #
         # self.__data._neurons = [
-        #     nn.Neuron([0] * axon_len, tf_type, json.loads(tf_params))
+        #     nn.Neuron([0] * axon_len, 0, tf_type, json.loads(tf_params))
         #     for id, tf_type, tf_params, axon_len
         #     in j["neurons"]
         # ]
@@ -91,6 +91,7 @@ class SaveLoad:
         загружает данные нейросети с идентификатором id из базы данных
         """
         d = self.__data = nn.Data()
+        d._id = id
 
         (
               d._extra_data["parent_id"]

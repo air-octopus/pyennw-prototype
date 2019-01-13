@@ -37,6 +37,8 @@ class Conductor:
 
     def get_best(self):
         key = lambda o: o[1]
-        m1 = max(self._nn_queue_active, key=key)
-        m2 = max(self._nn_queue_pending, key=key)
-        return max(m1, m2, key=key)
+        m1 = min(self._nn_queue_active, key=key) if len(self._nn_queue_active) > 0 else None
+        m2 = min(self._nn_queue_pending, key=key) if len(self._nn_queue_pending) > 0 else None
+        return min(m1, m2, key=key) if m1 and m2 else m1 if m1 else m2
+
+

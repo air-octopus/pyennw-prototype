@@ -25,14 +25,18 @@ class EvolutionProcessor:
         * сохраняем нейросеть в базу и в очередь эволюции
         """
         id = self.conductor.next()
-        nn = NeuralNetwork(id)
+        try:
+            nn = NeuralNetwork(id)
 
-        nn.mutate()
-        nn.train(steps_count=50)
-        nn.estimate(steps_count=10)
+            nn.mutate()
+            nn.train(steps_count=50)
+            nn.estimate(steps_count=10)
 
-        id = nn.save()
-        self.conductor.add(id, nn.data.adaptability)
+            id = nn.save()
+            self.conductor.add(id, nn.data.adaptability)
+        except:
+            print("Error occurred for id=%d" % (id))
+            return
 
 
 

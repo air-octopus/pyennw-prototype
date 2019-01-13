@@ -48,7 +48,7 @@ class Test_NeuralNetworkCalculations(unittest.TestCase):
     def tearDownClass(cls):
         Engine.destroy()
 
-    def test__neural_network_serialization_deserialization(self):
+    def test__neural_network_calculation_multistep(self):
         nn0 = NeuralNetwork.from_json(nn_json)
 
         calc = nn0.calculator

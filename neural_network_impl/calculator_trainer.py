@@ -54,7 +54,8 @@ class Trainer(nn.CalculatorBase):
         self._out     = []
         self._desired = []
         self._w = tf.Variable([synapse.weight for synapse in self._data.synapses], dtype=tf.float32)
-        self._b = tf.Variable([neuron.bias for neuron in self._data.neurons], dtype=tf.float32)
+        self._b = tf.Variable([neuron.bias for neuron in self._data.neurons if not neuron.is_receptor], dtype=tf.float32)
+        # self._b = tf.Variable([self._data.neurons[i].bias for i in self._indices_stitch_workers], dtype=tf.float32)
 
         for i in range(iterations_count):
             self._add_iteration()

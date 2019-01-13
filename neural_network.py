@@ -153,7 +153,7 @@ class NeuralNetwork:
 
         for n, ni in worker_neurons_to_neuron_ind.items():
             neuron_synapses_str = "{" + "|".join(["<s%d> %.5f" % (si, d.synapses[si].weight) for si in neuron_synapses[ni]]) + "}|" if ni in neuron_synapses else ""
-            neurons_str.append('    n%d [label="{%s<r>}"];' % (ni, neuron_synapses_str))
+            neurons_str.append('    n%d [label="{%s<r> %.5f}"];' % (ni, neuron_synapses_str, d.neurons[ni].bias))
 
         synapses_str = []
         for si, s in enumerate(d.synapses):

@@ -38,6 +38,8 @@ class Data:
     @property
     def id                  (self): return self._id
     @property
+    def parent_id           (self): return self._extra_data["parent_id"]
+    @property
     def input_neurons       (self): return [ self._neurons[i] for i in self._input_neurons_inds  ]
     @property
     def output_neurons      (self): return [ self._neurons[i] for i in self._output_neurons_inds ]
