@@ -111,17 +111,18 @@ class NeuralNetworkDB:
         c.execute(query_create_nn_input      )
         c.execute(query_create_nn_output     )
 
-#        c.execute('CREATE INDEX IF NOT EXISTS idx_nn_species_all_001 ON nn_species_all (is_alive)   ')
-#        c.execute('CREATE INDEX IF NOT EXISTS idx_synapses_001       ON synapses       (species_id) ')
-#        c.execute('CREATE INDEX IF NOT EXISTS idx_neuron_bodies_001  ON neuron_bodies  (species_id) ')
-#        c.execute('CREATE INDEX IF NOT EXISTS idx_nn_input_001       ON nn_input       (synapse_id) ')
-#        c.execute('CREATE INDEX IF NOT EXISTS idx_nn_output_001      ON nn_output      (neuron_id)  ')
+        c.execute('CREATE INDEX IF NOT EXISTS idx_nn_species_all_001 ON nn_species_all (is_alive)   ')
+        c.execute('CREATE INDEX IF NOT EXISTS idx_nn_species_all_002 ON nn_species_all (hash)       ')
+        c.execute('CREATE INDEX IF NOT EXISTS idx_synapses_001       ON synapses       (species_id) ')
+        c.execute('CREATE INDEX IF NOT EXISTS idx_neuron_bodies_001  ON neuron_bodies  (species_id) ')
+        c.execute('CREATE INDEX IF NOT EXISTS idx_nn_input_001       ON nn_input       (species_id) ')
+        c.execute('CREATE INDEX IF NOT EXISTS idx_nn_output_001      ON nn_output      (species_id) ')
 
-        c.execute("INSERT OR IGNORE INTO config (sid, value) VALUES ('alive_neural_network_queue_len'              , 100  )")
-        c.execute("INSERT OR IGNORE INTO config (sid, value) VALUES ('mutator_neuron_deleting_probability_factor'  , 0.01 )")
-        c.execute("INSERT OR IGNORE INTO config (sid, value) VALUES ('mutator_synapse_deleting_probability_factor' , 0.05 )")
-        c.execute("INSERT OR IGNORE INTO config (sid, value) VALUES ('mutator_neuron_adding_probability_factor'    , 0.01 )")
-        c.execute("INSERT OR IGNORE INTO config (sid, value) VALUES ('mutator_synapse_adding_probability_factor'   , 0.05 )")
+        c.execute("INSERT OR IGNORE INTO config (sid, value) VALUES ('alive_neural_network_queue_len'              , 10    )")
+        c.execute("INSERT OR IGNORE INTO config (sid, value) VALUES ('mutator_neuron_deleting_probability_factor'  , 0.003 )")
+        c.execute("INSERT OR IGNORE INTO config (sid, value) VALUES ('mutator_synapse_deleting_probability_factor' , 0.009 )")
+        c.execute("INSERT OR IGNORE INTO config (sid, value) VALUES ('mutator_neuron_adding_probability_factor'    , 0.01  )")
+        c.execute("INSERT OR IGNORE INTO config (sid, value) VALUES ('mutator_synapse_adding_probability_factor'   , 0.05  )")
 
         self.sqldb.commit()
 
@@ -149,7 +150,7 @@ class NeuralNetworkDB:
         """
         помечаем массив видов как вымершие
         """
-        q = "UPDATE nn_species_all SET is_alive=0 WHERE id in (%s)" % ",".join([str(id) for id in species_ids])
+        q = "UPDATE nn_species_all SET is_alive=0 WHERE id in (%s)" % ",".join([str(id[0]) for id in species_ids])
         self._cursor.execute(q)
 
     def load_species(self, species_id):
@@ -246,6 +247,17 @@ class NeuralNetworkDB:
             WHERE
                species_id = %d
         """ % species_id
+        return list(self._cursor.execute(q))
+
+    def find_nn_by_hash(self, hash):
+        q = """
+            SELECT
+                id
+            FROM nn_species_all
+            WHERE
+                hash = "%s"
+            LIMIT 1
+        """ % hash
         return list(self._cursor.execute(q))
 
     def save_species(self, parent_id

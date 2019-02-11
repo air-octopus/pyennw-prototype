@@ -15,9 +15,10 @@ class Mutator:
 
     @classmethod
     def mutate(cls, data : nn.Data):
+        db = Engine.db()
         counter = 0
         hash = data.hash
-        while data.hash == hash:
+        while data.hash == hash or len(db.find_nn_by_hash(data.hash)) > 0:
             cls._do_mutate(data)
             counter += 1
 

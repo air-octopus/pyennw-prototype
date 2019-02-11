@@ -26,6 +26,7 @@ class TrainingData:
 
     def __init__(self, db: NeuralNetworkDB = None, json_str = None):
         self._db = db
+        self._use_shuffle = False
         if json_str is None:
             json_str = '''
                 {

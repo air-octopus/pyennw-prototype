@@ -108,7 +108,7 @@ class Hasher:
         neurons_info = [
             (
                 n.origin.transfer_function_type,
-                tuple(Hasher.num_format % p for p in n.origin.transfer_function_params),
+                # tuple(Hasher.num_format % p for p in n.origin.transfer_function_params),
                 len(n.origin.axon),
                 n.origin.deepness
             )
@@ -119,7 +119,7 @@ class Hasher:
             (
                 neuron_ind_to_cid[s.src],
                 neuron_ind_to_cid[s.own],
-                Hasher.num_format % s.weight
+                # Hasher.num_format % s.weight
             )
             for s in sorted(d.synapses, key=lambda o: (neuron_ind_to_cid[o.src], neuron_ind_to_cid[o.own]))
         ]

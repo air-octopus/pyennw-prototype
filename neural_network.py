@@ -71,7 +71,6 @@ class NeuralNetwork:
         self._calculator = None
 
     def save(self):
-        # todo: реализовать вычисление времени отклика, качества и приспособленности НС
         return nn.SaveLoad().save(self._data)
 
     def load_inputs(self, inputs):
@@ -136,14 +135,18 @@ class NeuralNetwork:
         neurons_str = []
         neurons_str.append(
             '    info [label="{{'
+            'id|'
+            'parent_id|'
             'effective_deepness|'
             'response_time|'
             'resolving_ability|'
             'quality|'
             'adaptability'
             '}|{'
-            '%g|%g|%g|%g|%g'
+            '%d|%d|%g|%g|%g|%g|%g'
             '}}"];' % (
+            d.id,
+            d.parent_id,
             d._effective_deepness,
             d._response_time,
             d._resolving_ability,

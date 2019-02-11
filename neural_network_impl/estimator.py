@@ -54,13 +54,23 @@ class Estimator:
 
         response_time = np.argmin(squared_difference)
         quality = squared_difference[response_time]
-        adaptability = (response_time + 1) * quality
+        neuron_qty_factor = cls._calc_neuron_qty_factor(d)
+        synapse_qty_factor = cls._calc_synapse_qty_factor(d)
+        adaptability = (response_time + 1) * quality * neuron_qty_factor * synapse_qty_factor
 
         return (
             response_time , # response_time
             quality       , # quality
             adaptability    # adaptability
         )
+
+    @classmethod
+    def _calc_neuron_qty_factor(cls, d : nn.Data):
+        return len(d.neurons)
+
+    @classmethod
+    def _calc_synapse_qty_factor(cls, d : nn.Data):
+        return len(d.synapses)
 
     @classmethod
     def _calc_squared_difference_shifted(cls, a, b):

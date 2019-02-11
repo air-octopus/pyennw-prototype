@@ -34,6 +34,8 @@ class EvolutionProcessor:
 
             id = nn.save()
             self.conductor.add(id, nn.data.adaptability)
+        # finally:
+        #     pass
         except:
             print("Error occurred for id=%d" % (id))
             return

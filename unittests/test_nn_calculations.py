@@ -13,7 +13,7 @@ nn_json = """
     "quality": null,
     "adaptability": null,
     "extra_data": {
-        "parent": null,
+        "parent_id": null,
         "input_sids": [ "input_01", "input_02", "input_03" ],
         "output_sids": [ "unittest_simple" ]
     },

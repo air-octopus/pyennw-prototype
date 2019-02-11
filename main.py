@@ -50,9 +50,11 @@ create_engine(".temp/temp.db", "data/training-data.json")
 #         f.write(nn_gv)
 
 proc = Engine.evolution_processor()
-for i in range(30):
+for i in range(3000):
     print("step: %d" % (i))
     proc.step()
+    if os.path.exists(".temp/stop_it"):
+        break
 
 # proc.step()
 # proc.step()
@@ -86,13 +88,14 @@ ids = []
 while id:
     n = NeuralNetwork(id)
     ids.append(id)
-    id = n.data.extra_data["parent"]
+    id = n.data.extra_data["parent_id"]
 
 ids.reverse()
 for i, id in enumerate(ids):
     n = NeuralNetwork(id)
     n_gv = n.print_gv()
-    with open(".temp/nn_%03d_%03d.gv" % (i, id), "w") as f:
+    # with open(".temp/nn_%03d_%03d.gv" % (i, id), "w") as f:
+    with open(".temp/nn_%03d.gv" % (i), "w") as f:
         f.write(n_gv)
 
 exit(0)

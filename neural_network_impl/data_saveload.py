@@ -17,7 +17,7 @@ class SaveLoad:
 
         # сохраняем id родительской нейросети и получаем (создаем) id текущей
         # todo: реализовать вычисление времени отклика, качества и приспособленности НС
-        data._id = db.save_species(data.extra_data["parent"],
+        data._id = db.save_species(data.extra_data["parent_id"],
                                    data.hash,
                                    data.effective_deepness,
                                    data.response_time,

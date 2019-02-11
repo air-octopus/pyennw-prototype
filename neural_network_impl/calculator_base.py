@@ -147,7 +147,6 @@ class CalculatorBase:
             p8 = []
             for tf_type, indices in self._indices_gather_workers_for_applying_transfer_functions:
                 p8.append(self._apply_transfer_function(tf.gather(p7, indices), tf_type, None))
-                # todo: добавить вычисление функции активации в зависимости от типа tf_type
 
             p9 = tf.dynamic_stitch(self._indices_stich_workers_after_applying_transfer_functions, p8)
         else:
