@@ -61,8 +61,8 @@ class Trainer(nn.CalculatorBase):
             self._add_iteration()
 
         self._loss = None
-        skip = (int)(self._data._response_time)
-        # skip = 0 # MK_DEBUG
+        # skip = (int)(self._data._response_time)
+        skip = 0 # MK_DEBUG
         for out in self._out:
             desired = tf.placeholder(dtype=tf.float32, shape=out.shape)
             self._desired.append(desired)

@@ -119,8 +119,8 @@ class NeuralNetworkDB:
         c.execute('CREATE INDEX IF NOT EXISTS idx_nn_output_001      ON nn_output      (species_id) ')
 
         c.execute("INSERT OR IGNORE INTO config (sid, value) VALUES ('alive_neural_network_queue_len'              , 10    )")
-        c.execute("INSERT OR IGNORE INTO config (sid, value) VALUES ('mutator_neuron_deleting_probability_factor'  , 0.003 )")
-        c.execute("INSERT OR IGNORE INTO config (sid, value) VALUES ('mutator_synapse_deleting_probability_factor' , 0.009 )")
+        c.execute("INSERT OR IGNORE INTO config (sid, value) VALUES ('mutator_neuron_deleting_probability_factor'  , 0.01  )")
+        c.execute("INSERT OR IGNORE INTO config (sid, value) VALUES ('mutator_synapse_deleting_probability_factor' , 0.02  )")
         c.execute("INSERT OR IGNORE INTO config (sid, value) VALUES ('mutator_neuron_adding_probability_factor'    , 0.01  )")
         c.execute("INSERT OR IGNORE INTO config (sid, value) VALUES ('mutator_synapse_adding_probability_factor'   , 0.05  )")
 

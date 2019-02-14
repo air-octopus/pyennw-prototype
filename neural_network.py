@@ -88,8 +88,10 @@ class NeuralNetwork:
     def train(self, steps_count):
         # todo: steps_count необходимо оценивать в процессе тренировки (см. "ранняя остановка" в Гудфеллоу etc, 2018)
 #        try:
+#             iterations_count = max((int)(self._data._response_time), self.data.effective_deepness) * 3
+            iterations_count = self.data.effective_deepness * 5
             trainer = self.trainer
-            trainer.init(self.data.effective_deepness * 3)
+            trainer.init(iterations_count)
             trainer.training(steps_count)
 #        except:
 #            pass

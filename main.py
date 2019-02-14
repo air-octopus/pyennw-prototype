@@ -49,10 +49,13 @@ create_engine(".temp/temp.db", "data/training-data.json")
 #     with open(".temp/nn%03d.gv" % id, "w") as f:
 #         f.write(nn_gv)
 
+Engine.training_data()._use_shuffle = True
+
 proc = Engine.evolution_processor()
-for i in range(3000):
+i = 0
+while i < 3000:
     print("step: %d" % (i))
-    proc.step()
+    if proc.step(): i += 1
     if os.path.exists(".temp/stop_it"):
         break
 

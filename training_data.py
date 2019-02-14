@@ -24,6 +24,10 @@ class TrainingData:
             self.data_in = data_in
             self.data_out = data_out
 
+    @property
+    def use_shuffle(self):
+        return self._use_shuffle
+
     def __init__(self, db: NeuralNetworkDB = None, json_str = None):
         self._db = db
         self._use_shuffle = False
@@ -86,7 +90,12 @@ class TrainingData:
 
     def training_set_loopped(self):
         while True:
-            for ts in self._training_set:
+            if self.use_shuffle:
+                training_set = list(self._training_set)
+                random.shuffle(training_set)
+            else:
+                training_set = self._training_set
+            for ts in training_set:
                 yield TrainingData.Row(ts["in"], ts["out"])
 
     def training_set_portion(self, count):
